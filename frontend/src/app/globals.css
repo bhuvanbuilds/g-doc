@@ -615,23 +615,3 @@
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
-
-/* ─── landing hero visual ────────────────────────────────── */
-.hero-reveal {
-  animation: hero-reveal 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
-}
-@keyframes hero-reveal {
-  from { opacity: 0; filter: blur(24px); transform: translateY(24px) scale(0.97); }
-  to { opacity: 1; filter: blur(0); transform: none; }
-}
-.hero-orb {
-  animation: hero-orb 18s ease-in-out infinite alternate;
-}
-@keyframes hero-orb {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(8%, -6%) scale(1.12); }
-  100% { transform: translate(-6%, 8%) scale(0.95); }
-}
-@media (prefers-reduced-motion: reduce) {
-  .hero-reveal, .hero-orb { animation: none; }
-}

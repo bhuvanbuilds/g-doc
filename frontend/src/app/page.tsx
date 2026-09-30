@@ -22,7 +22,9 @@ import RotatingText from "@/components/reactbits/RotatingText";
 import ShinyText from "@/components/reactbits/ShinyText";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import TrueFocus from "@/components/reactbits/TrueFocus";
-import { HeroVisual } from "@/components/landing/hero-visual";
+import FaultyTerminal from "@/components/reactbits/FaultyTerminal";
+
+const HERO_GRID: [number, number] = [2, 1];
 
 const PRINCIPLES = [
   {
@@ -97,40 +99,62 @@ export default function LandingPage() {
     <div className="dot-matrix min-h-screen text-fg">
       <TopBar active="/" />
 
-      <main className="px-4 pb-24 lg:px-8">
-        {/* hero */}
-        <section className="mx-auto flex max-w-[1200px] flex-col items-center pb-20 pt-20 text-center sm:pt-28">
-          <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sapphire">
+      {/* hero */}
+      <section className="relative isolate -mt-16 flex min-h-[100svh] items-center justify-center overflow-hidden bg-black px-4 pb-24 pt-32 text-snow">
+        <div aria-hidden className="absolute inset-0 -z-10">
+          <FaultyTerminal
+            tint="#2667FF"
+            brightness={0.75}
+            scale={1.5}
+            gridMul={HERO_GRID}
+            digitSize={1.2}
+            scanlineIntensity={0.4}
+            curvature={0.15}
+            chromaticAberration={1}
+            mouseStrength={0.3}
+          />
+          {/* keep the headline legible and melt into the page below */}
+          <div className="absolute inset-0 bg-[radial-gradient(ellipse_55%_45%_at_center,rgb(0_0_0/0.78),transparent)]" />
+          <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-b from-transparent to-[var(--bg)]" />
+        </div>
+
+        <div className="flex max-w-[1100px] flex-col items-center text-center">
+          <p className="inline-flex items-center gap-2 rounded-full border border-snow/15 bg-black/40 px-4 py-1.5 text-[12.5px] font-semibold uppercase tracking-[0.16em] text-[#8fb0ff] backdrop-blur">
+            <ShieldCheck className="size-4" />
             <ShinyText text="About Tracemail" />
           </p>
           <BlurText
             as="h1"
             text="Email forensics that shows its work."
-            className="mt-5 max-w-[900px] text-[44px] font-semibold leading-[1.02] tracking-[-0.045em] sm:text-[64px] lg:text-[76px]"
+            className="mt-7 max-w-[1000px] text-[48px] font-semibold leading-[0.98] tracking-[-0.05em] sm:text-[76px] lg:text-[104px]"
             stagger={0.07}
           />
-          <p className="mt-7 flex flex-wrap items-center justify-center gap-x-2 text-[18px] text-muted sm:text-[20px]">
+          <p className="mt-8 flex flex-wrap items-center justify-center gap-x-2 text-[18px] text-snow/70 sm:text-[21px]">
             Built for
             <RotatingText
               words={["security analysts", "IT teams", "everyday users", "incident response"]}
-              className="rounded-lg bg-fg px-2.5 py-0.5 font-semibold text-snow"
+              className="rounded-lg bg-snow px-2.5 py-0.5 font-semibold text-black"
             />
           </p>
-          <p className="mt-6 max-w-[640px] text-[16px] leading-relaxed text-muted">
+          <p className="mt-6 max-w-[640px] text-[16.5px] leading-relaxed text-snow/65">
             Upload a suspicious email and get a clear verdict for anyone, with the full forensic trail underneath for
             whoever needs to dig in.
           </p>
-          <div className="mt-10 flex flex-wrap justify-center gap-3">
-            <Link href="/home" className="shiny-cta inline-flex h-12 items-center px-7 text-[15px] font-semibold">
+          <div className="mt-11 flex flex-wrap justify-center gap-3">
+            <Link href="/home" className="shiny-cta inline-flex h-13 items-center px-8 text-[15.5px] font-semibold">
               <span>Investigate an email</span>
             </Link>
-            <Link href="/dashboard" className="inline-flex h-12 items-center rounded-full border border-line-strong bg-panel px-6 text-[15px] font-medium hover:bg-fg/[0.03]">
+            <Link
+              href="/dashboard"
+              className="inline-flex h-13 items-center rounded-full border border-snow/20 bg-snow/[0.06] px-7 text-[15.5px] font-medium text-snow backdrop-blur hover:bg-snow/[0.12]"
+            >
               Open dashboard
             </Link>
           </div>
-          <HeroVisual />
-        </section>
+        </div>
+      </section>
 
+      <main className="px-4 pb-24 pt-8 lg:px-8">
         {/* principles */}
         <section className="mx-auto grid max-w-[1200px] gap-4 md:grid-cols-3">
           {PRINCIPLES.map(({ icon: Icon, title, body, color, glow }) => (

@@ -52,14 +52,14 @@ async def main():
     # --------------------------------
 
     print("\nVirusTotal:")
-    pprint(evidence["virustotal"])
+    pprint(evidence["technical_evidence"]["virustotal"])
 
     # --------------------------------
     # Print IPinfo results
     # --------------------------------
 
     print("\nIPinfo:")
-    pprint(evidence["ipinfo"])
+    pprint(evidence["technical_evidence"]["ipinfo"])
 
 
 if __name__ == "__main__":

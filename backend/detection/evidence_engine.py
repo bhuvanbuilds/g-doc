@@ -7,6 +7,7 @@ from parsers.attachment_analysis import analyze_attachments
 
 from services.virustotal import lookup_url
 from services.ipinfo import lookup_ip
+from services.groq import analyze_email_with_groq
 
 
 async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
@@ -72,23 +73,30 @@ async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
     # 7. Combine all observations
     # -----------------------------
 
-    all_observations = (
+    technical_observations = (
         header_analysis["observations"]
         + authentication_analysis["observations"]
         + url_analysis["observations"]
         + attachment_analysis["observations"]
     )
 
-    # -----------------------------
-    # 8. Return complete evidence
-    # -----------------------------
-
-    return {
+    technical_evidence = {
         "headers": header_analysis,
         "authentication": authentication_analysis,
         "urls": url_analysis,
         "attachments": attachment_analysis,
         "virustotal": virustotal_results,
         "ipinfo": ipinfo_results,
-        "observations": all_observations,
+        "observations": technical_observations,
+    }
+
+    ai_analysis = analyze_email_with_groq(
+        email_data=email_data,
+        evidence=technical_evidence,
+    )
+
+    return {
+        "technical_evidence": technical_evidence,
+        "ai_analysis": ai_analysis,
+        "observations": technical_observations,
     }

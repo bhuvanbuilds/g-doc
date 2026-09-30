@@ -1,6 +1,7 @@
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+from detection.evidence_engine import build_evidence
 from parsers.email_parser import parse_email
 
 
@@ -40,7 +41,7 @@ def health():
 @app.post("/api/investigate")
 async def investigate(file: UploadFile = File(...)):
     """
-    Receive an .eml file and return parsed email information.
+    Receive an .eml file and return the complete investigation result.
     """
 
     if not file.filename:
@@ -65,11 +66,13 @@ async def investigate(file: UploadFile = File(...)):
             )
 
         email_data = parse_email(file_bytes)
+        investigation = await build_evidence(email_data)
 
         return {
             "status": "success",
             "filename": file.filename,
             "email": email_data,
+            "investigation": investigation,
         }
 
     except HTTPException:
@@ -78,5 +81,8 @@ async def investigate(file: UploadFile = File(...)):
     except Exception as exc:
         raise HTTPException(
             status_code=400,
-            detail=f"Unable to parse email: {str(exc)}",
+            detail=(
+                f"Unable to investigate email ({type(exc).__name__}). "
+                "Check the .eml file and try again."
+            ),
         )

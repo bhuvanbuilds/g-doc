@@ -1,0 +1,27 @@
+From: "Microsoft Account Security" <security@example.com>
+To: testuser@example.com
+Reply-To: security-alert@gmail.com
+Return-Path: <bounce@example.com>
+Subject: Urgent: Your Account Will Be Suspended
+Date: Wed, 30 Sep 2026 10:30:00 +0530
+Message-ID: <test-12345@example.com>
+Received: from mail.example.com (mail.example.com [203.0.113.50])
+    by mx.example.net with ESMTPS id ABC123
+    for <testuser@example.com>; Wed, 30 Sep 2026 10:30:01 +0530
+Authentication-Results: mx.example.net;
+    spf=pass smtp.mailfrom=example.com;
+    dkim=pass header.d=example.com;
+    dmarc=pass header.from=example.com
+Content-Type: text/plain; charset="UTF-8"
+
+Dear User,
+
+Your account will be suspended within 24 hours.
+
+Please verify your account immediately:
+https://example.com/verify-account
+
+Failure to verify your account may result in permanent suspension.
+
+Regards,
+Microsoft Account Security

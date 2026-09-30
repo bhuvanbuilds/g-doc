@@ -23,8 +23,7 @@ export const metadata: Metadata = {
   description: site.description,
   applicationName: site.name,
   keywords: site.keywords,
-  authors: site.authors.map(({ name, url }) => ({ name, url })),
-  creator: "Bhuvanesh J",
+  authors: site.team.map(({ name, url }) => ({ name, url })),
   category: "security",
   alternates: { canonical: "/" },
   openGraph: {
@@ -49,13 +48,12 @@ const jsonLd = {
   operatingSystem: "Web",
   offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   keywords: site.keywords.join(", "),
-  creator: { "@type": "Person", name: "Bhuvanesh J" },
-  contributor: {
+  author: site.team.map(({ name, url, role }) => ({
     "@type": "Person",
-    name: "D Prem Sankar",
-    url: "https://prem.ikaruz.in",
-    jobTitle: "UI/UX Designer",
-  },
+    name,
+    url,
+    ...(role && { jobTitle: `${role} Designer` }),
+  })),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

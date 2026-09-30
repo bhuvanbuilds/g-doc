@@ -29,8 +29,10 @@ export const site = {
     "AI email security",
     "email spoofing detection",
   ],
-  authors: [
-    { name: "Bhuvanesh J" },
-    { name: "D Prem Sankar", url: "https://prem.ikaruz.in", role: "UI/UX Design" },
+  team: [
+    { name: "Lokesh S", url: "https://github.com/lokeshsiva2968" },
+    { name: "Sivapriyan S", url: "https://github.com/sivapriyan-s" },
+    { name: "Bhuvanesh J", url: "https://github.com/bhuvanbuilds" },
+    { name: "D Prem Sankar", url: "https://prem.ikaruz.in", role: "UI/UX" },
   ],
 };

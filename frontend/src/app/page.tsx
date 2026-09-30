@@ -23,6 +23,7 @@ import ShinyText from "@/components/reactbits/ShinyText";
 import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import TrueFocus from "@/components/reactbits/TrueFocus";
 import FaultyTerminal from "@/components/reactbits/FaultyTerminal";
+import { site } from "@/lib/site";
 
 const HERO_GRID: [number, number] = [2, 1];
 
@@ -272,15 +273,21 @@ export default function LandingPage() {
             .
           </p>
           <p className="mt-4 text-[13.5px] text-muted">
-            Built by Bhuvanesh J · UI/UX by{" "}
-            <a
-              href="https://prem.ikaruz.in"
-              target="_blank"
-              rel="noopener"
-              className="font-medium text-fg underline underline-offset-2"
-            >
-              D Prem Sankar
-            </a>
+            Presented to you by{" "}
+            {site.team.map(({ name, url, role }, i) => (
+              <span key={name}>
+                {i > 0 && (i === site.team.length - 1 ? " and " : ", ")}
+                <a
+                  href={url}
+                  target="_blank"
+                  rel="noopener"
+                  className="font-medium text-fg underline underline-offset-2"
+                >
+                  {name}
+                </a>
+                {role && ` (${role})`}
+              </span>
+            ))}
           </p>
         </section>
       </main>

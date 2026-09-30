@@ -4,19 +4,19 @@ from parsers.header_analysis import analyze_headers
 from parsers.auth_analysis import analyze_authentication
 from parsers.url_analysis import analyze_urls
 from parsers.attachment_analysis import analyze_attachments
+from parsers.relay_analysis import analyze_received_headers
+from parsers.timeline_analysis import analyze_timeline
 
 from services.virustotal import lookup_url
 from services.ipinfo import lookup_ip
 from services.groq import analyze_email_with_groq
+from detection.risk_engine import calculate_risk
 
 
 async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
     """
-    Run deterministic email analysis and external threat-intelligence
-    enrichment.
-
-    This function collects evidence but does not assign a final
-    threat score.
+    Run deterministic email analysis, external threat-intelligence
+    enrichment, semantic analysis, and risk assessment.
     """
 
     # -----------------------------
@@ -24,6 +24,9 @@ async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
     # -----------------------------
 
     header_analysis = analyze_headers(email_data)
+    relay_analysis = analyze_received_headers(
+        email_data.get("received", [])
+    )
 
     # -----------------------------
     # 2. SPF / DKIM / DMARC
@@ -69,6 +72,38 @@ async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
         result = lookup_ip(ip_address)
         ipinfo_results.append(result)
 
+    geolocation_fields = (
+        "hostname",
+        "city",
+        "region",
+        "country",
+        "country_name",
+        "loc",
+        "org",
+        "timezone",
+    )
+    ipinfo_by_ip = {}
+    for result in ipinfo_results:
+        if isinstance(result, dict) and isinstance(result.get("ip"), str):
+            ipinfo_by_ip.setdefault(result["ip"], result)
+
+    for relay in relay_analysis.get("relay_path", []):
+        if not isinstance(relay, dict):
+            continue
+
+        ipinfo_result = ipinfo_by_ip.get(relay.get("from_ip"))
+        if ipinfo_result is None:
+            relay["geolocation"] = None
+        else:
+            relay["geolocation"] = {
+                field: ipinfo_result.get(field)
+                for field in geolocation_fields
+            }
+
+    timeline_analysis = analyze_timeline(
+        relay_analysis.get("relay_path", [])
+    )
+
     # -----------------------------
     # 7. Combine all observations
     # -----------------------------
@@ -78,6 +113,7 @@ async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
         + authentication_analysis["observations"]
         + url_analysis["observations"]
         + attachment_analysis["observations"]
+        + relay_analysis["observations"]
     )
 
     technical_evidence = {
@@ -87,6 +123,8 @@ async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
         "attachments": attachment_analysis,
         "virustotal": virustotal_results,
         "ipinfo": ipinfo_results,
+        "relay": relay_analysis,
+        "timeline": timeline_analysis,
         "observations": technical_observations,
     }
 
@@ -94,9 +132,14 @@ async def build_evidence(email_data: dict[str, Any]) -> dict[str, Any]:
         email_data=email_data,
         evidence=technical_evidence,
     )
+    risk_assessment = calculate_risk(
+        technical_evidence=technical_evidence,
+        ai_analysis=ai_analysis,
+    )
 
     return {
         "technical_evidence": technical_evidence,
         "ai_analysis": ai_analysis,
+        "risk_assessment": risk_assessment,
         "observations": technical_observations,
     }

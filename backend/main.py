@@ -1,3 +1,5 @@
+import os
+
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,7 +17,10 @@ app = FastAPI(
 # Allow the Next.js frontend to communicate with FastAPI
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        *filter(None, os.getenv("FRONTEND_ORIGINS", "").split(",")),
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

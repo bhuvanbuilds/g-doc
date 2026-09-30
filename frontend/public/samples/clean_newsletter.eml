@@ -1,0 +1,26 @@
+From: "The Changelog" <news@changelog.example>
+To: reader@acme.example
+Return-Path: <bounces@changelog.example>
+Subject: This week in open source: 5 stories worth your time
+Date: Sun, 27 Sep 2026 08:00:00 +0000
+Message-ID: <weekly-412@changelog.example>
+Received: from mail.changelog.example (mail.changelog.example [198.51.100.8])
+    by mx.acme.example with ESMTPS id 1AA2
+    for <reader@acme.example>; Sun, 27 Sep 2026 08:00:03 +0000
+Authentication-Results: mx.acme.example;
+    spf=pass smtp.mailfrom=changelog.example;
+    dkim=pass header.d=changelog.example;
+    dmarc=pass header.from=changelog.example
+Content-Type: text/plain; charset="UTF-8"
+
+Hi there,
+
+Here are this week's picks:
+
+1. A deep dive into incremental compilers
+   https://changelog.example/posts/incremental-compilers
+2. Why your CI is slow (and how to fix it)
+   https://changelog.example/posts/fast-ci
+
+You are receiving this because you subscribed at changelog.example.
+Unsubscribe: https://changelog.example/unsubscribe

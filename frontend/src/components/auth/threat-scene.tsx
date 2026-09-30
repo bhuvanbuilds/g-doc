@@ -17,7 +17,7 @@ const SHIELD =
 function Envelope({ stroke }: { stroke: string }) {
   return (
     <g>
-      <rect x="-15" y="-10" width="30" height="20" rx="2" fill="var(--bg)" stroke={stroke} strokeWidth="1.8" />
+      <rect x="-15" y="-10" width="30" height="20" rx="2" fill="var(--black)" stroke={stroke} strokeWidth="1.8" />
       <path d="M-13 -7.5 0 1.5 13 -7.5" fill="none" stroke={stroke} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
     </g>
   );
@@ -59,12 +59,12 @@ export function ThreatScene() {
       {/* attacker */}
       <g transform="translate(80 150)">
 
-        <text y="82" textAnchor="middle" className="fill-fg text-[15px] font-medium">Attacker</text>
+        <text y="82" textAnchor="middle" className="fill-snow text-[15px] font-medium">Attacker</text>
       </g>
 
       {/* recipient */}
       <g transform="translate(560 150)">
-        <text y="82" textAnchor="middle" className="fill-fg text-[15px] font-medium">Recipient</text>
+        <text y="82" textAnchor="middle" className="fill-snow text-[15px] font-medium">Recipient</text>
       </g>
 
       {/* mail — inbound */}
@@ -97,7 +97,7 @@ export function ThreatScene() {
       {mails.map((m) => (
         <g key={m.label} transform="translate(320 262)">
           <g className="scene-chip" style={{ animationDelay: m.delay }}>
-            <rect x="-78" y="-15" width="156" height="30" rx="4" fill="var(--bg)" stroke={m.tone} strokeWidth="1.5" />
+            <rect x="-78" y="-15" width="156" height="30" rx="4" fill="var(--black)" stroke={m.tone} strokeWidth="1.5" />
             <text y="5" textAnchor="middle" className="font-mono text-[13px] font-medium" style={{ fill: m.text }}>
               {m.label}
             </text>

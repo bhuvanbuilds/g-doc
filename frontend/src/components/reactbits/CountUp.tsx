@@ -1,8 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 // Count-up number in the style of React Bits' CountUp. Starts when scrolled into view.
+// Writes to the DOM directly so each animation frame doesn't re-render React.
+const fmt = (n: number) => n.toLocaleString("en-US");
+
 export default function CountUp({
   to,
   from = 0,
@@ -17,13 +20,12 @@ export default function CountUp({
   className?: string;
 }) {
   const ref = useRef<HTMLSpanElement>(null);
-  const [value, setValue] = useState(from);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      setValue(to);
+      el.textContent = fmt(to);
       return;
     }
     let raf = 0;
@@ -36,7 +38,7 @@ export default function CountUp({
         const tick = (now: number) => {
           const t = Math.min(1, (now - start) / (duration * 1000));
           const eased = 1 - Math.pow(1 - t, 4);
-          setValue(Math.round(from + (to - from) * eased));
+          el.textContent = fmt(Math.round(from + (to - from) * eased));
           if (t < 1) raf = requestAnimationFrame(tick);
         };
         raf = requestAnimationFrame(tick);
@@ -52,7 +54,7 @@ export default function CountUp({
 
   return (
     <span ref={ref} className={className}>
-      {value.toLocaleString("en-US")}
+      {fmt(from)}
     </span>
   );
 }

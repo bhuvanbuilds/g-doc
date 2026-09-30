@@ -23,7 +23,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`dark ${interTight.variable} ${jetbrainsMono.variable} h-full`}
+      className={`${interTight.variable} ${jetbrainsMono.variable} h-full`}
     >
       <body className="min-h-full flex flex-col">
         <ClickSpark sparkColor="#2667FF" sparkSize={10} sparkRadius={18} sparkCount={8} duration={420}>

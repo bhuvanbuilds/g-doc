@@ -20,14 +20,15 @@
   --sapphire: #2667ff;
   --gold: #d5a021;
 
-  --bg: #fcf7f8;
+  --bg: #f6f3f2;
   --panel: #ffffff;
-  --panel-2: #f5f0f1;
-  --border: #e9e2e4;
-  --border-strong: #d8cfd2;
+  --panel-2: #faf8f7;
+  --border: #e8e3e1;
+  --border-strong: #d7d0cd;
   --fg: #050609;
   --muted: #5f6470;
   --subtle: #8d919b;
+  --dot: rgb(5 6 9 / 0.07);
 
   --brand: #2667ff;
   --brand-hover: #1a56e6;
@@ -46,6 +47,7 @@
 }
 
 .dark {
+  --dot: rgb(252 247 248 / 0.05);
   --bg: #050609;
   --panel: #0b0d11;
   --panel-2: #111318;
@@ -243,4 +245,59 @@
   .scene * { animation: none !important; }
   .scene-mail-blocked, .scene-mail-in, .scene-chip { opacity: 0 !important; }
   .scene-mail-out { opacity: 1 !important; transform: translateX(54px) !important; }
+}
+
+/* ── shine button ────────────────────────────────────────── */
+.btn-shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.35) 50%, transparent 65%);
+  transform: translateX(-120%);
+  animation: btn-shine 3.2s ease-in-out infinite;
+}
+@keyframes btn-shine {
+  0%, 55% { transform: translateX(-120%); }
+  100% { transform: translateX(120%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .btn-shine::after { animation: none; }
+}
+
+/* ── dashboard scroll-expand ─────────────────────────────── */
+.scroll-expand {
+  --p: 0;
+  --s: 0.6;
+}
+.scroll-expand__frame {
+  transform-origin: 50% 0%;
+  transform: scale(var(--s));
+  border-radius: calc((1 - var(--p)) * 14px);
+  border: 1px solid rgb(213 160 33 / calc((1 - var(--p)) * 0.28));
+  overflow: hidden;
+  will-change: transform;
+}
+.scroll-expand[data-full] .scroll-expand__frame {
+  transform: none;
+  overflow: visible;
+  will-change: auto;
+}
+.scroll-expand__glow {
+  opacity: calc(1 - var(--p));
+}
+@media (prefers-reduced-motion: reduce) {
+  .scroll-expand__frame { transform: none; border-radius: 0; border-color: transparent; }
+  .scroll-expand__glow { display: none; }
+}
+@keyframes scroll-cue {
+  0%, 100% { transform: translateY(0); opacity: 1; }
+  60% { transform: translateY(6px); opacity: 0.3; }
+}
+
+/* ── page background ─────────────────────────────────────── */
+.dot-matrix {
+  background-color: var(--bg);
+  background-image: radial-gradient(var(--dot) 1px, transparent 1.4px);
+  background-size: 16px 16px;
+  background-attachment: fixed;
 }

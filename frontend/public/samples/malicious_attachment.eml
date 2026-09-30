@@ -1,0 +1,38 @@
+From: "DHL Express" <notification@dhl-delivery-support.example>
+To: user@acme.example
+Reply-To: dhl-support@dhl-delivery-support.example
+Return-Path: <notification@dhl-delivery-support.example>
+Subject: Your parcel could not be delivered - invoice attached
+Date: Mon, 28 Sep 2026 16:40:02 +0000
+Message-ID: <shp-44821@dhl-delivery-support.example>
+Received: from out.dhl-delivery-support.example (out.dhl-delivery-support.example [198.51.100.140])
+    by mx.acme.example with ESMTP id 9ZK1
+    for <user@acme.example>; Mon, 28 Sep 2026 16:40:09 +0000
+Authentication-Results: mx.acme.example;
+    spf=pass smtp.mailfrom=dhl-delivery-support.example;
+    dkim=pass header.d=dhl-delivery-support.example;
+    dmarc=pass header.from=dhl-delivery-support.example
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="b1"
+
+--b1
+Content-Type: text/plain; charset="UTF-8"
+
+Dear customer,
+
+We attempted to deliver your parcel but the address was incomplete.
+Open the attached invoice to confirm your details, or reschedule here:
+http://203.0.113.45:8080/dhl/reschedule?id=44821
+
+A redelivery fee of $1.99 applies.
+
+DHL Express
+--b1
+Content-Type: application/octet-stream; name="Invoice_44821.iso"
+Content-Disposition: attachment; filename="Invoice_44821.iso"
+Content-Transfer-Encoding: base64
+
+VGhpcyBpcyBhIGhhcm1sZXNzIHBsYWNlaG9sZGVyIHN0YW5kaW5nIGluIGZvciBhIGRpc2sgaW1h
+Z2UuCg==
+
+--b1--

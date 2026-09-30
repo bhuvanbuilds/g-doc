@@ -1,0 +1,32 @@
+From: "Rahul Mehta" <rahul.mehta@acme-corp.co>
+To: finance@acme.example
+Reply-To: r.mehta.ceo@gmail.com
+Return-Path: <bounce-9912@mailer-srv.example.net>
+Subject: Quick favour - are you at your desk?
+Date: Tue, 29 Sep 2026 09:12:44 +0530
+Message-ID: <a81f22c9@acme-corp.co>
+Received: from mx2.relay-eu.example.net (mx2.relay-eu.example.net [198.51.100.23])
+    by mx.acme.example with ESMTPS id 7Q1AB
+    for <finance@acme.example>; Tue, 29 Sep 2026 09:12:51 +0530
+Received: from smtp.mailer-srv.example.net (unknown [192.0.2.77])
+    by mx2.relay-eu.example.net with ESMTP id 55KD2
+    for <finance@acme.example>; Tue, 29 Sep 2026 09:12:47 +0530
+Received: from [203.0.113.9] (helo=desktop-7g2k)
+    by smtp.mailer-srv.example.net with esmtpa id 1x9Q
+    for <finance@acme.example>; Tue, 29 Sep 2026 09:12:45 +0530
+Authentication-Results: mx.acme.example;
+    spf=softfail smtp.mailfrom=mailer-srv.example.net;
+    dkim=none;
+    dmarc=fail header.from=acme-corp.co
+Content-Type: text/plain; charset="UTF-8"
+
+Hi,
+
+Are you at your desk? I need you to process an urgent wire transfer to a new
+vendor before 11am today. I'm in back-to-back meetings so please don't call,
+just reply here and I'll send the account details.
+
+Keep this confidential until the deal is announced.
+
+Rahul
+Sent from my iPhone

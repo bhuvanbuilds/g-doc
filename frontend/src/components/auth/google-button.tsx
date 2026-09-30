@@ -26,14 +26,25 @@ function GoogleIcon() {
 }
 
 // UI only — the auth flow is wired separately. Swap `onClick` for the real sign-in.
-export function GoogleButton({ onClick }: { onClick?: () => void }) {
+const variants = {
+  solid: "bg-black text-snow hover:bg-black/85",
+  outline: "border border-black/15 bg-white text-black shadow-[0_1px_2px_rgb(5_6_9/0.06)] hover:bg-black/[0.03]",
+};
+
+export function GoogleButton({
+  onClick,
+  variant = "solid",
+}: {
+  onClick?: () => void;
+  variant?: keyof typeof variants;
+}) {
   const router = useRouter();
 
   return (
     <button
       type="button"
-      onClick={onClick ?? (() => router.push("/dashboard"))}
-      className="flex h-12 w-full items-center justify-center gap-3 rounded-lg bg-black text-[15px] font-medium text-snow transition hover:bg-black/85 active:scale-[0.99]"
+      onClick={onClick ?? (() => router.push("/home"))}
+      className={`flex h-12 w-full items-center justify-center gap-3 rounded-lg text-[15px] font-medium transition active:scale-[0.99] ${variants[variant]}`}
     >
       <span className="flex size-[22px] items-center justify-center rounded-full bg-white">
         <GoogleIcon />

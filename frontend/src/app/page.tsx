@@ -274,7 +274,7 @@ export default function LandingPage() {
           </p>
           <p className="mt-4 text-[13.5px] text-muted">
             Presented to you by{" "}
-            {site.team.map(({ name, url, role }, i) => (
+            {site.team.map(({ name, url }, i) => (
               <span key={name}>
                 {i > 0 && (i === site.team.length - 1 ? " and " : ", ")}
                 <a
@@ -285,7 +285,6 @@ export default function LandingPage() {
                 >
                   {name}
                 </a>
-                {role && ` (${role})`}
               </span>
             ))}
           </p>

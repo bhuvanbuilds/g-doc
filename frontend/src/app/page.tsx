@@ -247,6 +247,17 @@ export default function LandingPage() {
             </Link>
             .
           </p>
+          <p className="mt-4 text-[13.5px] text-muted">
+            Built by Bhuvanesh J · UI/UX by{" "}
+            <a
+              href="https://prem.ikaruz.in"
+              target="_blank"
+              rel="noopener"
+              className="font-medium text-fg underline underline-offset-2"
+            >
+              D Prem Sankar
+            </a>
+          </p>
         </section>
       </main>
     </div>

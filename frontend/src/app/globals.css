@@ -301,3 +301,337 @@
   background-size: 16px 16px;
   background-attachment: fixed;
 }
+
+/* ─── Shiny CTA (21st.dev "shiny-button" by designali-in, adapted) ─────────
+   Goldenrod highlight on black for the main import/export actions. Font import
+   removed (the app's Inter Tight is used); keyframes are prefixed.         */
+@property --gradient-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --gradient-angle-offset {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+@property --gradient-percent {
+  syntax: "<percentage>";
+  initial-value: 5%;
+  inherits: false;
+}
+@property --gradient-shine {
+  syntax: "<color>";
+  initial-value: white;
+  inherits: false;
+}
+
+.shiny-cta {
+  --shiny-cta-bg: #050609;
+  --shiny-cta-bg-subtle: #23262d;
+  --shiny-cta-fg: #ffffff;
+  --shiny-cta-highlight: #d5a021;
+  --shiny-cta-highlight-subtle: #f2c14e;
+  --animation: shiny-gradient-angle linear infinite;
+  --duration: 3s;
+  --shadow-size: 2px;
+  --transition: 800ms cubic-bezier(0.25, 1, 0.5, 1);
+
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  outline-offset: 4px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  color: var(--shiny-cta-fg);
+  background:
+    linear-gradient(var(--shiny-cta-bg), var(--shiny-cta-bg)) padding-box,
+    conic-gradient(
+        from calc(var(--gradient-angle) - var(--gradient-angle-offset)),
+        transparent,
+        var(--shiny-cta-highlight) var(--gradient-percent),
+        var(--gradient-shine) calc(var(--gradient-percent) * 2),
+        var(--shiny-cta-highlight) calc(var(--gradient-percent) * 3),
+        transparent calc(var(--gradient-percent) * 4)
+      )
+      border-box;
+  box-shadow: inset 0 0 0 1px var(--shiny-cta-bg-subtle);
+  transition: var(--transition);
+  transition-property: --gradient-angle-offset, --gradient-percent,
+    --gradient-shine;
+}
+
+
+
+.shiny-cta::before,
+.shiny-cta::after,
+.shiny-cta > span::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 50%;
+  inset-block-start: 50%;
+  translate: -50% -50%;
+  z-index: -1;
+}
+
+.shiny-cta:active {
+  translate: 0 1px;
+}
+
+/* Dots pattern */
+.shiny-cta::before {
+  --size: calc(100% - var(--shadow-size) * 3);
+  --position: 2px;
+  --space: calc(var(--position) * 2);
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(
+      circle at var(--position) var(--position),
+      white calc(var(--position) / 4),
+      transparent 0
+    )
+    padding-box;
+  background-size: var(--space) var(--space);
+  background-repeat: space;
+  mask-image: conic-gradient(
+    from calc(var(--gradient-angle) + 45deg),
+    black,
+    transparent 10% 90%,
+    black
+  );
+  border-radius: inherit;
+  opacity: 0.4;
+}
+
+/* Inner shimmer */
+.shiny-cta::after {
+  --animation: shiny-shimmer linear infinite;
+  width: 100%;
+  aspect-ratio: 1;
+  background: linear-gradient(
+    -50deg,
+    transparent,
+    var(--shiny-cta-highlight),
+    transparent
+  );
+  mask-image: radial-gradient(circle at bottom, transparent 40%, black);
+  opacity: 0.6;
+}
+
+.shiny-cta > span {
+  z-index: 1;
+}
+
+.shiny-cta > span::before {
+  --size: calc(100% + 1rem);
+  width: var(--size);
+  height: var(--size);
+  box-shadow: inset 0 -1ex 2rem 4px var(--shiny-cta-highlight);
+  opacity: 0;
+  transition: opacity var(--transition);
+  animation: calc(var(--duration) * 1.5) shiny-breathe linear infinite;
+}
+
+.shiny-cta,
+.shiny-cta::before,
+.shiny-cta::after {
+  animation:
+    var(--animation) var(--duration),
+    var(--animation) calc(var(--duration) / 0.4) reverse paused;
+  animation-composition: add;
+}
+
+.shiny-cta:is(:hover, :focus-visible) {
+  --gradient-percent: 20%;
+  --gradient-angle-offset: 95deg;
+  --gradient-shine: var(--shiny-cta-highlight-subtle);
+}
+
+.shiny-cta:is(:hover, :focus-visible),
+.shiny-cta:is(:hover, :focus-visible)::before,
+.shiny-cta:is(:hover, :focus-visible)::after {
+  animation-play-state: running;
+}
+
+.shiny-cta:is(:hover, :focus-visible) > span::before {
+  opacity: 1;
+}
+
+@keyframes shiny-gradient-angle {
+  to {
+    --gradient-angle: 360deg;
+  }
+}
+
+@keyframes shiny-shimmer {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes shiny-breathe {
+  from,
+  to {
+    scale: 1;
+  }
+  50% {
+    scale: 1.2;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shiny-cta,
+  .shiny-cta::before,
+  .shiny-cta::after,
+  .shiny-cta > span::before {
+    animation: none;
+  }
+}
+
+/* ─── Offer hover (21st.dev "offer-button", adapted) ────────────────────────
+   Hovering the trigger slides two small drawers out above and below it. Used
+   on the navbar Dashboard link: corner brackets removed, drawers sized to fit
+   inside the 64px bar (36px link + 14px space either side), palette colours,
+   plain CSS instead of styled-components.                                   */
+.offer-container {
+  --offer-timing: cubic-bezier(0, 0, 0, 2.5);
+  --offer-duration: 250ms;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.offer-trigger {
+  transition: transform var(--offer-duration) var(--offer-timing);
+}
+
+.offer-drawer {
+  position: absolute;
+  z-index: 0;
+  display: flex;
+  justify-content: center;
+  white-space: nowrap;
+  height: 16px;
+  padding: 0 0.55em;
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  color: #fff;
+  background: linear-gradient(#fff3, #0001), var(--sapphire);
+  opacity: 0;
+  pointer-events: none;
+  filter: blur(2px);
+  transition:
+    transform calc(0.5 * var(--offer-duration)) ease,
+    filter var(--offer-duration) var(--offer-timing),
+    opacity calc(0.5 * var(--offer-duration)) ease;
+}
+
+.offer-drawer-top {
+  top: 0;
+  left: 0;
+  border-radius: 8px 8px 0 0;
+  align-items: center;
+}
+
+.offer-drawer-bottom {
+  bottom: 0;
+  right: 0;
+  border-radius: 0 0 8px 8px;
+  align-items: center;
+}
+
+.offer-container:has(.offer-trigger:hover, .offer-trigger:focus-visible)
+  .offer-trigger {
+  transform: scale(1.04);
+}
+
+.offer-container:has(.offer-trigger:hover, .offer-trigger:focus-visible)
+  .offer-drawer {
+  opacity: 1;
+  filter: blur(0);
+  animation: offer-hue 3s infinite linear;
+}
+
+.offer-container:has(.offer-trigger:hover, .offer-trigger:focus-visible)
+  .offer-drawer-top {
+  transform: translateY(-11px) rotateZ(1.5deg);
+}
+
+.offer-container:has(.offer-trigger:hover, .offer-trigger:focus-visible)
+  .offer-drawer-bottom {
+  transform: translateY(11px) rotateZ(1.5deg);
+}
+
+.offer-container:has(.offer-trigger:active) .offer-trigger {
+  transform: scale(0.96);
+}
+
+.offer-container:has(.offer-trigger:active) .offer-drawer {
+  transform: translateY(0) scale(0.5);
+}
+
+@keyframes offer-hue {
+  0%,
+  100% {
+    filter: hue-rotate(0deg);
+  }
+  50% {
+    filter: hue-rotate(-25deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .offer-trigger,
+  .offer-drawer {
+    transition: none;
+    animation: none !important;
+  }
+}
+
+
+/* ─── Shiny text (React Bits "ShinyText") ──────────────────────────────── */
+.shiny-text {
+  background-image: linear-gradient(110deg, rgb(from currentColor r g b / 0.5) 40%, currentColor 50%, rgb(from currentColor r g b / 0.5) 60%);
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shiny-text 4s linear infinite;
+}
+@keyframes shiny-text {
+  from { background-position: 150% 0; }
+  to { background-position: -100% 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .shiny-text { animation: none; -webkit-text-fill-color: currentColor; }
+}
+
+@keyframes grow-x {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* ─── landing hero visual ────────────────────────────────── */
+.hero-reveal {
+  animation: hero-reveal 1.4s cubic-bezier(0.2, 0.8, 0.2, 1) 0.3s both;
+}
+@keyframes hero-reveal {
+  from { opacity: 0; filter: blur(24px); transform: translateY(24px) scale(0.97); }
+  to { opacity: 1; filter: blur(0); transform: none; }
+}
+.hero-orb {
+  animation: hero-orb 18s ease-in-out infinite alternate;
+}
+@keyframes hero-orb {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(8%, -6%) scale(1.12); }
+  100% { transform: translate(-6%, 8%) scale(0.95); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-reveal, .hero-orb { animation: none; }
+}

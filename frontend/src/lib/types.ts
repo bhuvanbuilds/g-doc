@@ -115,6 +115,49 @@ export type IpInfoResult =
     }
   | { status: "error"; ip: string; error: string };
 
+// parsers/relay_analysis.py — hops in header order (newest first)
+export interface RelayGeolocation {
+  hostname: string | null;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  country_name: string | null;
+  loc: string | null;
+  org: string | null;
+  timezone: string | null;
+}
+
+export interface RelayHop {
+  hop: number;
+  from_host: string | null;
+  from_ip: string | null;
+  to_host: string | null;
+  protocol: string | null;
+  raw: string;
+  geolocation?: RelayGeolocation | null;
+}
+
+export interface RelayAnalysis {
+  relay_path: RelayHop[];
+  observations: Observation[];
+}
+
+// parsers/timeline_analysis.py
+export interface TimelineEvent {
+  hop: number | null;
+  timestamp: string | null; // ISO
+  from_host: string | null;
+  from_ip: string | null;
+  to_host: string | null;
+  protocol: string | null;
+  event_type: string;
+}
+
+export interface TimelineAnalysis {
+  events: TimelineEvent[];
+  summary: { hop_count: number; first_observed: string | null; last_observed: string | null };
+}
+
 export interface TechnicalEvidence {
   headers: HeaderAnalysis;
   authentication: AuthenticationAnalysis;
@@ -122,6 +165,8 @@ export interface TechnicalEvidence {
   attachments: AttachmentAnalysis;
   virustotal: VirusTotalResult[];
   ipinfo: IpInfoResult[];
+  relay?: RelayAnalysis;
+  timeline?: TimelineAnalysis;
   observations: Observation[];
 }
 
@@ -146,8 +191,9 @@ export type AiAnalysis =
 
 // ─── risk assessment (in progress on the backend) ────────────────────────────
 export interface RiskBreakdownItem {
-  // The backend shape is still settling; normalise via lib/derive.ts.
+  // detection/risk_engine.py emits { source, signal, points, reason }; normalise via lib/derive.ts.
   source?: "technical" | "ai" | string;
+  signal?: string;
   category?: string;
   type?: string;
   reason?: string;

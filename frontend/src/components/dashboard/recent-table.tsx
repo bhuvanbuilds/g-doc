@@ -4,8 +4,7 @@ import Link from "next/link";
 import { ArrowUpRight, Inbox } from "lucide-react";
 import { useInvestigations } from "@/hooks/use-investigations";
 import { timeAgo, verdict } from "@/lib/derive";
-import { cn } from "@/lib/utils";
-import { riskStyle } from "./risk";
+import { RiskTag } from "./risk-tag";
 
 export function RecentTable({ limit = 8, title = "Recent investigations" }: { limit?: number; title?: string }) {
   const items = useInvestigations();
@@ -33,7 +32,6 @@ export function RecentTable({ limit = 8, title = "Recent investigations" }: { li
         <ul className="divide-y divide-line border-t border-line">
           {items.slice(0, limit).map((it) => {
             const v = verdict(it.result);
-            const s = riskStyle[v.level];
             const e = it.result.email;
             return (
               <li key={it.id}>
@@ -41,10 +39,7 @@ export function RecentTable({ limit = 8, title = "Recent investigations" }: { li
                   href={`/investigate/${it.id}`}
                   className="group grid grid-cols-[120px_1fr_auto] items-center gap-4 px-6 py-4 transition-colors hover:bg-fg/[0.03] md:grid-cols-[120px_1.2fr_1fr_90px_24px]"
                 >
-                  <span className={cn("inline-flex w-fit items-center gap-1.5 rounded-md border px-2 py-0.5 text-[12px] font-semibold", s.badge)}>
-                    {s.short}
-                    {v.score !== null && <span className="font-mono">{v.score}</span>}
-                  </span>
+                  <RiskTag level={v.level} score={v.score} />
                   <div className="min-w-0">
                     <p className="truncate text-[14px] font-medium">{e.subject || "(no subject)"}</p>
                     <p className="truncate font-mono text-[12px] text-muted">{it.result.filename}</p>

@@ -61,6 +61,7 @@ function ServerCard({ data }: NodeProps<ServerNode>) {
 const nodeTypes = { server: ServerCard };
 
 function linkLabel(l: RelayLink) {
+  if (l.gap) return "not recorded";
   const bits = [l.protocol, l.delaySec !== null ? `+${l.delaySec}s` : null].filter(Boolean);
   return bits.join(" · ");
 }
@@ -79,12 +80,12 @@ export function RelayGraph({ servers, links }: { servers: RelayServer[]; links: 
       id: `e${i}`,
       source: String(i),
       target: String(i + 1),
-      animated: true,
+      animated: !l.gap,
       label: linkLabel(l) || undefined,
-      labelStyle: { fontSize: 11, fontFamily: "var(--font-jetbrains-mono)" },
+      labelStyle: { fontSize: 11, fontFamily: "var(--font-jetbrains-mono)", fill: l.gap ? "#8D919B" : undefined },
       labelBgStyle: { fill: "#FCF7F8" },
-      style: { stroke: "#2667FF", strokeWidth: 1.5 },
-      markerEnd: { type: MarkerType.ArrowClosed, color: "#2667FF" },
+      style: l.gap ? { stroke: "#B9B2AF", strokeWidth: 1.5, strokeDasharray: "4 4" } : { stroke: "#2667FF", strokeWidth: 1.5 },
+      markerEnd: { type: MarkerType.ArrowClosed, color: l.gap ? "#B9B2AF" : "#2667FF" },
     }));
     return { nodes, edges };
   }, [servers, links]);
@@ -112,6 +113,7 @@ export function RelayGraph({ servers, links }: { servers: RelayServer[]; links: 
 export function RelaySection({ r }: { r: InvestigateResponse }) {
   const { servers, links } = relayPath(r);
   const located = servers.filter((s) => s.geo).length;
+  const hops = links.filter((l) => !l.gap).length;
 
   return (
     <Section
@@ -122,7 +124,7 @@ export function RelaySection({ r }: { r: InvestigateResponse }) {
       <Panel className="overflow-hidden">
         <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
           <h3 className="text-[15px] font-semibold">
-            {servers.length} server{servers.length === 1 ? "" : "s"} · {links.length} hop{links.length === 1 ? "" : "s"}
+            {servers.length} server{servers.length === 1 ? "" : "s"} · {hops} hop{hops === 1 ? "" : "s"}
           </h3>
           <span className="text-[12.5px] text-muted">
             {located ? `${located} located via IPinfo` : "No IP geolocation for these hops"} · drag to rearrange

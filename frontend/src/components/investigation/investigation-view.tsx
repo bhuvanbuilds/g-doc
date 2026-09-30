@@ -9,7 +9,8 @@ import { AiFindingsSection } from "./ai-findings";
 import { BreakdownSection } from "./breakdown";
 import { EmailDetailsSection } from "./email-details";
 import { EvidenceSection } from "./evidence";
-import { Overview } from "./overview";
+import { exportInvestigation, Overview } from "./overview";
+import { isTyping } from "@/components/shortcuts";
 import { RelaySection } from "./relay-map";
 import { Panel, Section } from "./section";
 
@@ -48,6 +49,23 @@ export function InvestigationView({ id }: { id: string }) {
   const item = items?.find((i) => i.id === id);
   const active = useActiveSection(Boolean(item));
 
+  useEffect(() => {
+    if (!item) return;
+    const go = (id: string) => document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    const onKey = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey || isTyping(e)) return;
+      const k = e.key.toLowerCase();
+      const idx = NAV.findIndex((n) => n.id === active);
+      if (k === "j") go(NAV[Math.min(NAV.length - 1, idx + 1)].id);
+      else if (k === "k") go(NAV[Math.max(0, idx - 1)].id);
+      else if (/^[1-7]$/.test(k)) go(NAV[Number(k) - 1].id);
+      else if (k === "e") exportInvestigation(item);
+      else if (k === "p") window.print();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [item, active]);
+
   if (items === null) return <div className="min-h-[60vh]" />;
 
   if (!item) {
@@ -83,7 +101,10 @@ export function InvestigationView({ id }: { id: string }) {
                     active === n.id ? "bg-fg text-snow" : "text-muted hover:bg-fg/5 hover:text-fg"
                   )}
                 >
-                  {n.label}
+                  <span className="flex items-center justify-between">
+                    {n.label}
+                    <span className={cn("font-mono text-[11px]", active === n.id ? "text-snow/60" : "text-subtle")}>{NAV.indexOf(n) + 1}</span>
+                  </span>
                 </a>
               </li>
             ))}

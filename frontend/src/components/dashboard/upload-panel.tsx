@@ -2,9 +2,13 @@
 
 import { useEffect, useRef, useState, type DragEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Check, FileText, FileUp, Loader2, X } from "lucide-react";
+import { Check, FileText, FileUp, Loader2, Lock, X } from "lucide-react";
 import BorderGlow from "@/components/reactbits/BorderGlow";
 import FolderFloat from "@/components/reactbits/FolderFloat";
+import BlurText from "@/components/reactbits/BlurText";
+import ShinyText from "@/components/reactbits/ShinyText";
+import TrueFocus from "@/components/reactbits/TrueFocus";
+import { useInvestigations } from "@/hooks/use-investigations";
 import { GlowCursor } from "@/components/reactbits/glow-cursor";
 import { Grainient } from "@/components/reactbits/grainient";
 import { ApiError, investigate, MAX_EML_BYTES } from "@/lib/api";
@@ -23,10 +27,12 @@ const STEPS = [
 
 const SAMPLES = [
   { label: "Account suspension", value: "suspicious_test.eml" },
-  { label: "CEO fraud (BEC)", value: "ceo_fraud.eml" },
+  { label: "CEO fraud", value: "ceo_fraud.eml" },
   { label: "Parcel + attachment", value: "malicious_attachment.eml" },
   { label: "Clean newsletter", value: "clean_newsletter.eml" },
 ];
+
+const shorten = (s: string, n = 26) => (s.length > n ? `${s.slice(0, n - 1)}…` : s);
 
 type State =
   | { kind: "idle" }
@@ -48,6 +54,17 @@ export function UploadPanel() {
   const [dragging, setDragging] = useState(false);
   const [state, setState] = useState<State>({ kind: "idle" });
   const running = state.kind === "running";
+  const history = useInvestigations();
+  const recent = (history ?? []).slice(0, 5).map((it) => ({
+    label: shorten(it.result.email.subject || it.result.filename),
+    value: it.id,
+  }));
+
+  useEffect(() => {
+    const open = () => inputRef.current?.click();
+    window.addEventListener("tm:open-upload", open);
+    return () => window.removeEventListener("tm:open-upload", open);
+  }, []);
 
   // Advance the visible steps while the request is in flight; hold on the last one.
   useEffect(() => {
@@ -110,8 +127,8 @@ export function UploadPanel() {
       <div aria-hidden className="absolute inset-0 opacity-90">
         <Grainient
           color1="#050609"
-          color2="#3a2708"
-          color3="#D5A021"
+          color2="#16181e"
+          color3="#4a5366"
           timeSpeed={0.12}
           warpStrength={0.8}
           warpAmplitude={40}
@@ -122,7 +139,7 @@ export function UploadPanel() {
           centerX={0.7}
         />
       </div>
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black via-black/75 to-black/20" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
 
       <GlowCursor
         className="relative z-10 !h-auto"
@@ -134,15 +151,24 @@ export function UploadPanel() {
       >
         <div className="grid gap-10 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:p-10">
           <div className="min-w-0">
-            <p className="text-[13px] font-medium text-snow/60">New investigation</p>
-            <h1 className="mt-1 text-[32px] font-semibold leading-tight tracking-[-0.035em] sm:text-[40px]">
-              Investigate an email
-            </h1>
+            <p className="text-[13px] font-medium text-snow/70">
+              <ShinyText text="New investigation" />
+            </p>
+            <BlurText as="h1" text="Investigate an email" className="mt-1 text-[32px] font-semibold leading-tight tracking-[-0.035em] sm:text-[44px]" />
             <p className="mt-2 max-w-[560px] text-[15px] leading-relaxed text-snow/70">
               Drop the raw <span className="font-mono text-snow">.eml</span> file. Headers, authentication,
               relay path, links and attachments are pulled apart and scored.
             </p>
 
+            <BorderGlow
+              className="mt-8"
+              backgroundColor="#0b0d11"
+              borderRadius={16}
+              glowRadius={28}
+              edgeSensitivity={25}
+              glowColor="42 75 62"
+              colors={["#D5A021", "#2667FF", "#F2C14E"]}
+            >
             <div
               onDragOver={(e) => {
                 e.preventDefault();
@@ -151,8 +177,8 @@ export function UploadPanel() {
               onDragLeave={() => setDragging(false)}
               onDrop={onDrop}
               className={cn(
-                "mt-8 rounded-2xl border border-dashed p-5 backdrop-blur-md transition-colors sm:p-6",
-                dragging ? "border-gold bg-gold/10" : "border-snow/20 bg-snow/[0.06]"
+                "rounded-2xl border border-dashed p-5 transition-colors sm:p-6",
+                dragging ? "border-gold bg-gold/10" : "border-transparent"
               )}
             >
               {state.kind === "running" ? (
@@ -182,22 +208,14 @@ export function UploadPanel() {
                       </>
                     )}
                   </div>
-                  <BorderGlow
-                    backgroundColor={file ? "#D5A021" : "#FCF7F8"}
-                    borderRadius={12}
-                    glowRadius={18}
-                    edgeSensitivity={20}
-                    glowColor="42 70 60"
-                    colors={["#D5A021", "#2667FF", "#F2C14E"]}
+                  <button
+                    type="button"
+                    onClick={() => (file ? analyze(file) : inputRef.current?.click())}
+                    title={file ? "Analyze" : "Browse files (U)"}
+                    className="shiny-cta inline-flex h-11 shrink-0 items-center justify-center px-6 text-[14px] font-semibold"
                   >
-                    <button
-                      type="button"
-                      onClick={() => (file ? analyze(file) : inputRef.current?.click())}
-                      className="h-11 px-6 text-[14px] font-semibold text-black active:scale-[0.98]"
-                    >
-                      {file ? (state.kind === "error" ? "Try again" : "Analyze") : "Browse files"}
-                    </button>
-                  </BorderGlow>
+                    <span>{file ? (state.kind === "error" ? "Try again" : "Analyze email") : "Browse files"}</span>
+                  </button>
                   <input
                     ref={inputRef}
                     type="file"
@@ -211,6 +229,21 @@ export function UploadPanel() {
                 </div>
               )}
             </div>
+            </BorderGlow>
+
+            <div className="mt-4 flex flex-wrap items-center gap-2 text-[13px]">
+              <span className="text-snow/50">Try a sample:</span>
+              {SAMPLES.map((x) => (
+                <button
+                  key={x.value}
+                  disabled={running}
+                  onClick={() => runSample(x.value)}
+                  className="rounded-full border border-snow/15 px-3 py-1 text-snow/80 transition hover:border-gold/60 hover:text-snow disabled:opacity-40"
+                >
+                  {x.label}
+                </button>
+              ))}
+            </div>
 
             {state.kind === "error" && (
               <div role="alert" className="mt-3 flex items-start gap-2 rounded-xl border border-ruby/60 bg-ruby/25 px-3 py-2.5 text-[13.5px] text-snow">
@@ -223,11 +256,16 @@ export function UploadPanel() {
             )}
           </div>
 
-          <div className="flex items-end justify-center pt-40 lg:pt-0">
+          <div className="flex flex-col items-center justify-between gap-10 pt-40 lg:pt-0">
+            <p className="flex items-center gap-2.5 self-end text-[15px] font-medium text-snow/90 lg:mt-2">
+              <Lock className="size-4 text-gold" />
+              <TrueFocus sentence="Your inbox stays private" blur={4} pause={1.2} />
+            </p>
+            {recent.length > 0 ? (
             <FolderFloat
-              items={SAMPLES}
-              label="Sample emails"
-              sublabel="Hover, then pick one"
+              items={recent}
+              label="Recent emails"
+              sublabel={`Last ${recent.length} investigated`}
               trigger="hover"
               physics
               drift={0.4}
@@ -241,8 +279,13 @@ export function UploadPanel() {
               itemColor="#FCF7F8"
               itemTextColor="#050609"
               labelColor="#050609"
-              onSelect={(value) => runSample(value)}
+              onSelect={(value) => router.push(`/investigate/${value}`)}
             />
+            ) : (
+              <div className="flex h-[154px] w-[210px] flex-col justify-end rounded-2xl border border-dashed border-snow/15 p-4 text-[13px] text-snow/50">
+                Your last 5 investigations will appear here.
+              </div>
+            )}
           </div>
         </div>
       </GlowCursor>

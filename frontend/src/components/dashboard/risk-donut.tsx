@@ -1,5 +1,6 @@
 "use client";
 
+import SpotlightCard from "@/components/reactbits/SpotlightCard";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
 import CountUp from "@/components/reactbits/CountUp";
 import type { RiskLevel } from "@/lib/types";
@@ -12,7 +13,7 @@ export function RiskDonut({ levels }: { levels: Record<RiskLevel, number> }) {
   const total = data.reduce((n, d) => n + d.value, 0);
 
   return (
-    <div className="flex h-full flex-col rounded-2xl border border-line bg-panel p-6">
+    <SpotlightCard spotlightColor="rgb(163 22 33 / 0.1)" className="flex h-full flex-col rounded-2xl border border-line bg-panel p-6">
       <h2 className="text-[16px] font-semibold tracking-[-0.01em]">Risk breakdown</h2>
 
       <div className="relative mx-auto mt-4 aspect-square w-full max-w-[240px]">
@@ -62,6 +63,6 @@ export function RiskDonut({ levels }: { levels: Record<RiskLevel, number> }) {
           </li>
         ))}
       </ul>
-    </div>
+    </SpotlightCard>
   );
 }

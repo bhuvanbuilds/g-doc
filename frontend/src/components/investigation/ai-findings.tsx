@@ -1,8 +1,7 @@
 import { Bot, CircleCheck, TriangleAlert } from "lucide-react";
-import { riskStyle, severityStyle } from "@/components/dashboard/risk";
-import { humanize, SEVERITY_RANK } from "@/lib/derive";
+import { friendlyAiError, humanize, SEVERITY_RANK } from "@/lib/derive";
 import type { InvestigateResponse } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { RiskTag } from "@/components/dashboard/risk-tag";
 import { Empty, Panel, Section } from "./section";
 
 export function AiFindingsSection({ r }: { r: InvestigateResponse }) {
@@ -15,7 +14,15 @@ export function AiFindingsSection({ r }: { r: InvestigateResponse }) {
           <TriangleAlert className="mt-0.5 size-5 shrink-0 text-med-fg" />
           <div>
             <p className="text-[14px] font-semibold">AI analysis unavailable</p>
-            <p className="mt-1 text-[13.5px] text-muted">{ai?.error ?? "The AI service did not return a result."} Technical evidence is unaffected.</p>
+            <p className="mt-1 text-[13.5px] text-muted">
+              {friendlyAiError(r) ?? "The AI service did not return a result."} The score and technical evidence are unaffected.
+            </p>
+            {ai?.status === "error" && ai.error && (
+              <details className="mt-2 text-[12.5px]">
+                <summary className="cursor-pointer text-muted">Technical details</summary>
+                <pre className="mt-2 whitespace-pre-wrap break-all font-mono text-[11.5px] text-fg/70">{ai.error}</pre>
+              </details>
+            )}
           </div>
         </Panel>
       ) : (
@@ -25,9 +32,8 @@ export function AiFindingsSection({ r }: { r: InvestigateResponse }) {
               <h3 className="flex items-center gap-2 text-[15px] font-semibold">
                 <Bot className="size-4 text-sapphire" /> Signals
               </h3>
-              <span className={cn("rounded-md border px-2 py-0.5 text-[12px] font-semibold", riskStyle[ai.analysis.risk_level].badge)}>
-                AI rates {riskStyle[ai.analysis.risk_level].short.toLowerCase()}
-              </span>
+              <span className="text-[13px] text-muted">AI rates it</span>
+              <RiskTag level={ai.analysis.risk_level} />
               <span className="ml-auto font-mono text-[12px] text-muted">
                 {ai.model ?? ai.provider} · {Math.round(ai.analysis.confidence * 100)}% confidence
               </span>
@@ -40,9 +46,7 @@ export function AiFindingsSection({ r }: { r: InvestigateResponse }) {
                   .sort((a, b) => SEVERITY_RANK[b.severity] - SEVERITY_RANK[a.severity])
                   .map((s, i) => (
                     <li key={i} className="flex items-start gap-4 px-5 py-4">
-                      <span className={cn("mt-0.5 w-[70px] shrink-0 rounded-md border px-1.5 py-0.5 text-center text-[11.5px] font-semibold", severityStyle[s.severity]?.badge)}>
-                        {severityStyle[s.severity]?.label ?? s.severity}
-                      </span>
+                      <RiskTag level={s.severity} className="mt-0.5 w-[84px] shrink-0" />
                       <div className="min-w-0">
                         <p className="text-[14px] font-semibold">{humanize(s.type)}</p>
                         <p className="mt-0.5 text-[13.5px] leading-relaxed text-fg/80">{s.description}</p>

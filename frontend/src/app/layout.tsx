@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
 import ClickSpark from "@/components/reactbits/ClickSpark";
+import { Shortcuts } from "@/components/shortcuts";
 import { site } from "@/lib/site";
 import "./globals.css";
 
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ClickSpark sparkColor="#2667FF" sparkSize={10} sparkRadius={18} sparkCount={8} duration={420}>
           {children}
         </ClickSpark>
+        <Shortcuts />
       </body>
     </html>
   );

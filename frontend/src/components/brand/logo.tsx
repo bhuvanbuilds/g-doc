@@ -30,11 +30,17 @@ export function LogoMark({ className }: { className?: string }) {
   );
 }
 
-export function Logo({ className }: { className?: string }) {
+const SIZES = {
+  md: { mark: "size-7", text: "text-[17px]", gap: "gap-2.5" },
+  lg: { mark: "size-9", text: "text-[21px]", gap: "gap-3" },
+};
+
+export function Logo({ className, size = "md" }: { className?: string; size?: keyof typeof SIZES }) {
+  const s = SIZES[size];
   return (
-    <div className={cn("flex items-center gap-2.5", className)}>
-      <LogoMark />
-      <span className="text-[15px] font-semibold tracking-tight">
+    <div className={cn("flex items-center", s.gap, className)}>
+      <LogoMark className={s.mark} />
+      <span className={cn(s.text, "font-semibold tracking-[-0.02em]")}>
         {site.name}
       </span>
     </div>

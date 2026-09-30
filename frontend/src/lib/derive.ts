@@ -24,6 +24,10 @@ export interface Verdict {
   confidence: number | null;
   summary: string | null;
   actions: string[];
+  // "ai" when the AI returned them, "evidence" when derived here because it didn't.
+  source: "ai" | "evidence";
+  actionsSource: "ai" | "evidence";
+  aiError: string | null;
   scored: boolean; // true when the backend risk engine produced the score
 }
 
@@ -32,16 +36,68 @@ function levelFromObservations(obs: Observation[]): RiskLevel {
   return max >= 4 ? "critical" : max === 3 ? "high" : max === 2 ? "medium" : "low";
 }
 
+// Groq errors arrive as long provider strings; reduce them to something readable.
+export function friendlyAiError(r: InvestigateResponse): string | null {
+  const ai = r.investigation.ai_analysis;
+  if (!ai || ai.status === "success") return null;
+  const e = (ai.error ?? "").toLowerCase();
+  if (e.includes("413") || e.includes("too large")) return "This email is too long for the AI model's request limit.";
+  if (e.includes("429") || e.includes("rate limit") || e.includes("rate_limit")) return "The AI service hit its rate limit.";
+  if (e.includes("not configured")) return "AI analysis isn't configured on the server.";
+  if (e.includes("invalid json") || e.includes("empty response")) return "The AI returned an unreadable answer.";
+  return "The AI service didn't return a result.";
+}
+
+function signalsPresent(r: InvestigateResponse): Set<string> {
+  const s = new Set<string>();
+  r.investigation.risk_assessment?.breakdown?.forEach((b) => b.signal && s.add(b.signal));
+  r.investigation.observations.forEach((o) => s.add(o.type));
+  return s;
+}
+
+function evidenceSummary(r: InvestigateResponse, level: RiskLevel, score: number | null): string {
+  const reasons = (r.investigation.risk_assessment?.reasons ?? [])
+    .map((x) => (typeof x === "string" ? x : x.reason ?? x.title ?? ""))
+    .filter(Boolean);
+  const head = score !== null ? `Scored ${score}/100 (${level} risk)` : `Rated ${level} risk`;
+  if (!reasons.length) return `${head}. The technical checks found no risk indicators.`;
+  // Lowercase the first word for mid-sentence use, but keep acronyms (SPF, DMARC) and names (VirusTotal).
+  const list = reasons.slice(0, 3).map((x) => (/^[A-Z][a-z]+\b/.test(x) && !/^[A-Z][a-z]+[A-Z]/.test(x) ? x.charAt(0).toLowerCase() + x.slice(1) : x));
+  const more = reasons.length > 3 ? `, plus ${reasons.length - 3} more` : "";
+  return `${head} from technical evidence: ${list.join("; ")}${more}.`;
+}
+
+function evidenceActions(r: InvestigateResponse, level: RiskLevel): string[] {
+  const s = signalsPresent(r);
+  const has = (...keys: string[]) => keys.some((k) => [...s].some((x) => x.startsWith(k)));
+  const out: string[] = [];
+  if (has("virustotal_malicious", "virustotal_suspicious", "ip_based_url", "unusual_url_port"))
+    out.push("Don't open the links in this email.");
+  if (has("suspicious_attachment_extension")) out.push("Don't open the attachment.");
+  if (has("reply_to_mismatch")) out.push("Don't reply directly. Replies go to a different domain than the sender.");
+  if (has("spf_fail", "dkim_fail", "dmarc_fail", "spf_softfail", "dmarc_problem", "spf_problem"))
+    out.push("Confirm the sender through a separate, known channel before acting on it.");
+  if (level === "high" || level === "critical") out.push("Report the email to your security team.");
+  if (!out.length) out.push("No specific action needed. Stay cautious with unexpected requests.");
+  return out.slice(0, 3);
+}
+
 export function verdict(r: InvestigateResponse): Verdict {
   const ra = r.investigation.risk_assessment;
   const ai = aiVerdict(r);
+  const level = ra?.risk_level ?? ai?.risk_level ?? levelFromObservations(r.investigation.observations);
+  const score = typeof ra?.score === "number" ? Math.round(ra.score) : null;
+  const aiUsable = Boolean(ai?.summary);
   return {
-    level: ra?.risk_level ?? ai?.risk_level ?? levelFromObservations(r.investigation.observations),
-    score: typeof ra?.score === "number" ? Math.round(ra.score) : null,
+    level,
+    score,
     confidence: ra?.confidence ?? ai?.confidence ?? null,
-    summary: ai?.summary ?? null,
-    actions: ai?.recommended_actions ?? [],
-    scored: typeof ra?.score === "number",
+    summary: aiUsable ? ai!.summary : evidenceSummary(r, level, score),
+    actions: ai?.recommended_actions?.length ? ai.recommended_actions : evidenceActions(r, level),
+    source: aiUsable ? "ai" : "evidence",
+    actionsSource: ai?.recommended_actions?.length ? "ai" : "evidence",
+    aiError: friendlyAiError(r),
+    scored: score !== null,
   };
 }
 
@@ -243,6 +299,7 @@ export interface RelayLink {
   at: string | null; // raw date string
   delaySec: number | null;
   protocol: string | null;
+  gap?: boolean; // hand-off not recorded in the headers
 }
 
 const IPV4 = /\b(?:\d{1,3}\.){3}\d{1,3}\b/;
@@ -264,7 +321,62 @@ function parseReceived(header: string) {
   };
 }
 
+// Preferred: the backend's relay_path (already geolocated) + timeline timestamps.
+function relayFromBackend(r: InvestigateResponse): { servers: RelayServer[]; links: RelayLink[] } | null {
+  const te = r.investigation.technical_evidence;
+  const path = te.relay?.relay_path;
+  if (!path?.length) return null;
+
+  const timeByHop = new Map((te.timeline?.events ?? []).map((e) => [e.hop, e.timestamp]));
+  const hops = [...path].sort((a, b) => b.hop - a.hop); // header order is newest first → oldest first
+
+  const servers: RelayServer[] = [];
+  const links: RelayLink[] = [];
+  let prev: number | null = null;
+
+  let prevHop: (typeof hops)[number] | null = null;
+
+  for (const h of hops) {
+    // Gmail and others sometimes record the same hop twice.
+    if (prevHop && prevHop.from_host === h.from_host && prevHop.from_ip === h.from_ip && prevHop.to_host === h.to_host) continue;
+    prevHop = h;
+
+    const geo: RelayServer["geo"] = h.geolocation ? { status: "found", ip: h.from_ip ?? "", ...h.geolocation } : null;
+    const sender = h.from_host ?? h.from_ip;
+    const last = servers[servers.length - 1];
+
+    if (!last) {
+      if (sender) servers.push({ host: sender, ip: h.from_ip, geo, role: "origin" });
+    } else if (sender && sender !== last.host && h.from_ip !== last.ip) {
+      // The sender isn't the previous receiver: a hand-off the headers don't record.
+      servers.push({ host: sender, ip: h.from_ip, geo, role: "relay" });
+      links.push({ at: null, delaySec: null, protocol: null, gap: true });
+    } else if (!last.ip && h.from_ip) {
+      last.ip = h.from_ip;
+      last.geo = geo;
+    }
+
+    const at = timeByHop.get(h.hop) ?? null;
+    const t = at ? Date.parse(at) : NaN;
+    if (servers.length) {
+      links.push({
+        at,
+        delaySec: prev !== null && !Number.isNaN(t) ? Math.round((t - prev) / 1000) : null,
+        protocol: h.protocol,
+      });
+    }
+    if (!Number.isNaN(t)) prev = t;
+    servers.push({ host: h.to_host ?? "unknown", ip: null, geo: null, role: "relay" });
+  }
+
+  servers.forEach((s, i) => (s.role = i === 0 ? "origin" : i === servers.length - 1 ? "recipient" : "relay"));
+  return { servers, links };
+}
+
 export function relayPath(r: InvestigateResponse): { servers: RelayServer[]; links: RelayLink[] } {
+  const fromBackend = relayFromBackend(r);
+  if (fromBackend) return fromBackend;
+
   const hops = [...(r.email.received ?? [])].reverse().map(parseReceived); // oldest first
   const geoByIp = new Map(
     r.investigation.technical_evidence.ipinfo

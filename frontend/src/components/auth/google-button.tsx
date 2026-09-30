@@ -1,6 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Loader2 } from "lucide-react";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
 
 function GoogleIcon() {
   return (
@@ -25,31 +27,48 @@ function GoogleIcon() {
   );
 }
 
-// UI only — the auth flow is wired separately. Swap `onClick` for the real sign-in.
 const variants = {
   solid: "bg-black text-snow hover:bg-black/85",
   outline: "border border-black/15 bg-white text-black shadow-[0_1px_2px_rgb(5_6_9/0.06)] hover:bg-black/[0.03]",
 };
 
-export function GoogleButton({
-  onClick,
-  variant = "solid",
-}: {
-  onClick?: () => void;
-  variant?: keyof typeof variants;
-}) {
-  const router = useRouter();
+// Google sign-in through Supabase Auth. Returns via /auth/callback.
+export function GoogleButton({ variant = "solid" }: { variant?: keyof typeof variants }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function signIn() {
+    setError(null);
+    if (!isSupabaseConfigured) {
+      setError("Supabase isn't configured. Add the keys to .env.local.");
+      return;
+    }
+    setLoading(true);
+    const next = new URLSearchParams(window.location.search).get("next") ?? "/home";
+    const { error } = await supabase().auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}` },
+    });
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    }
+  }
 
   return (
-    <button
-      type="button"
-      onClick={onClick ?? (() => router.push("/home"))}
-      className={`flex h-12 w-full items-center justify-center gap-3 rounded-lg text-[15px] font-medium transition active:scale-[0.99] ${variants[variant]}`}
-    >
-      <span className="flex size-[22px] items-center justify-center rounded-full bg-white">
-        <GoogleIcon />
-      </span>
-      Continue with Google
-    </button>
+    <div className="space-y-3">
+      <button
+        type="button"
+        onClick={signIn}
+        disabled={loading}
+        className={`flex h-12 w-full items-center justify-center gap-3 rounded-lg text-[15px] font-medium transition active:scale-[0.99] disabled:opacity-70 ${variants[variant]}`}
+      >
+        <span className="flex size-[22px] items-center justify-center rounded-full bg-white">
+          {loading ? <Loader2 className="size-4 animate-spin text-black" /> : <GoogleIcon />}
+        </span>
+        {loading ? "Redirecting to Google…" : "Continue with Google"}
+      </button>
+      {error && <p className="rounded-md border border-ruby/30 bg-ruby/[0.06] px-3 py-2 text-[13px] text-ruby">{error}</p>}
+    </div>
   );
 }

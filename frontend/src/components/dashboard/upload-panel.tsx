@@ -149,19 +149,19 @@ export function UploadPanel() {
         glowIntensity={1.5}
         opacity={0.7}
       >
-        <div className="grid gap-10 p-6 sm:p-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:p-10">
+        <div className="grid gap-10 p-5 sm:p-8 lg:grid-cols-[minmax(0,1fr)_400px] lg:p-10">
           <div className="min-w-0">
             <p className="text-[13px] font-medium text-snow/70">
               <ShinyText text="New investigation" />
             </p>
-            <BlurText as="h1" text="Investigate an email" className="mt-1 text-[32px] font-semibold leading-tight tracking-[-0.035em] sm:text-[44px]" />
-            <p className="mt-2 max-w-[560px] text-[15px] leading-relaxed text-snow/70">
+            <BlurText as="h1" text="Investigate an email" className="mt-1 text-[30px] font-semibold leading-tight tracking-[-0.035em] sm:text-[44px]" />
+            <p className="mt-2 max-w-[560px] text-[14.5px] leading-relaxed text-snow/70 sm:text-[15px]">
               Drop the raw <span className="font-mono text-snow">.eml</span> file. Headers, authentication,
               relay path, links and attachments are pulled apart and scored.
             </p>
 
             <BorderGlow
-              className="mt-8"
+              className="mt-6 sm:mt-8"
               backgroundColor="#0b0d11"
               borderRadius={16}
               glowRadius={28}
@@ -177,14 +177,15 @@ export function UploadPanel() {
               onDragLeave={() => setDragging(false)}
               onDrop={onDrop}
               className={cn(
-                "rounded-2xl border border-dashed p-5 transition-colors sm:p-6",
+                "rounded-2xl border border-dashed p-4 transition-colors sm:p-6",
                 dragging ? "border-gold bg-gold/10" : "border-transparent"
               )}
             >
               {state.kind === "running" ? (
                 <Progress name={state.file.name} step={state.step} />
               ) : (
-                <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center">
+                <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center sm:gap-5">
+                  <div className="flex min-w-0 flex-1 items-center gap-4 sm:gap-5">
                   <span className="flex size-12 shrink-0 items-center justify-center rounded-xl bg-snow/10">
                     {file ? <FileText className="size-5" /> : <FileUp className="size-5" />}
                   </span>
@@ -202,17 +203,25 @@ export function UploadPanel() {
                     ) : (
                       <>
                         <p className="text-[15px] font-medium">
-                          {dragging ? "Release to add this file" : "Drag and drop an .eml file"}
+                          {dragging ? (
+                            "Release to add this file"
+                          ) : (
+                            <>
+                              <span className="pointer-coarse:hidden">Drag and drop an .eml file</span>
+                              <span className="hidden pointer-coarse:inline">Choose an .eml file</span>
+                            </>
+                          )}
                         </p>
                         <p className="mt-0.5 text-[13px] text-snow/60">Up to 10 MB, analysed only for this investigation</p>
                       </>
                     )}
                   </div>
+                  </div>
                   <button
                     type="button"
                     onClick={() => (file ? analyze(file) : inputRef.current?.click())}
                     title={file ? "Analyze" : "Browse files (U)"}
-                    className="shiny-cta inline-flex h-11 shrink-0 items-center justify-center px-6 text-[14px] font-semibold"
+                    className="shiny-cta tap-press inline-flex h-12 w-full shrink-0 items-center justify-center px-6 text-[15px] font-semibold sm:h-11 sm:w-auto sm:text-[14px]"
                   >
                     <span>{file ? (state.kind === "error" ? "Try again" : "Analyze email") : "Browse files"}</span>
                   </button>
@@ -231,19 +240,25 @@ export function UploadPanel() {
             </div>
             </BorderGlow>
 
-            <div className="mt-4 flex flex-wrap items-center gap-2 text-[13px]">
-              <span className="text-snow/50">Try a sample:</span>
+            <p className="mt-5 text-[13px] text-snow/50 sm:hidden">Try a sample</p>
+            <div className="no-scrollbar -mx-5 mt-2 flex items-center gap-2 overflow-x-auto px-5 text-[13px] sm:mx-0 sm:mt-4 sm:flex-wrap sm:overflow-visible sm:px-0">
+              <span className="hidden text-snow/50 sm:inline">Try a sample:</span>
               {SAMPLES.map((x) => (
                 <button
                   key={x.value}
                   disabled={running}
                   onClick={() => runSample(x.value)}
-                  className="rounded-full border border-snow/15 px-3 py-1 text-snow/80 transition hover:border-gold/60 hover:text-snow disabled:opacity-40"
+                  className="tap-press shrink-0 rounded-full border border-snow/15 px-3.5 py-2 text-snow/80 transition hover:border-gold/60 hover:text-snow disabled:opacity-40 sm:px-3 sm:py-1"
                 >
                   {x.label}
                 </button>
               ))}
             </div>
+
+            <p className="mt-5 flex items-center gap-2 text-[13px] text-snow/60 lg:hidden">
+              <Lock className="size-3.5 text-gold" />
+              Your inbox stays private. Only this file is analysed.
+            </p>
 
             {state.kind === "error" && (
               <div role="alert" className="mt-3 flex items-start gap-2 rounded-xl border border-ruby/60 bg-ruby/25 px-3 py-2.5 text-[13.5px] text-snow">
@@ -256,7 +271,8 @@ export function UploadPanel() {
             )}
           </div>
 
-          <div className="flex flex-col items-center justify-between gap-10 pt-40 lg:pt-0">
+          {/* desktop only: on phones the recent list sits right below the panel */}
+          <div className="hidden flex-col items-center justify-between gap-10 lg:flex">
             <p className="flex items-center gap-2.5 self-end text-[15px] font-medium text-snow/90 lg:mt-2">
               <Lock className="size-4 text-gold" />
               <TrueFocus sentence="Your inbox stays private" blur={4} pause={1.2} />

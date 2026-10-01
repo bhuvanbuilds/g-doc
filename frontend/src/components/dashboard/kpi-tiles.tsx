@@ -24,18 +24,18 @@ export function KpiTiles({
   ];
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-2 gap-3 sm:gap-4">
       {tiles.map((t, i) => (
-        <SpotlightCard key={t.label} spotlightColor={t.glow} className="rounded-2xl border border-line bg-panel p-6">
-          <span className="[&>svg]:size-7 [&>svg]:stroke-[1.75px]" style={{ color: t.color }}>
+        <SpotlightCard key={t.label} spotlightColor={t.glow} className="rounded-2xl border border-line bg-panel p-4 sm:p-6">
+          <span className="[&>svg]:size-6 [&>svg]:stroke-[1.75px] sm:[&>svg]:size-7" style={{ color: t.color }}>
             {t.icon}
           </span>
-          <p className="mt-5 text-[14px] font-medium text-muted">{t.label}</p>
-          <p className="mt-1 text-[36px] font-bold leading-none tracking-[-0.04em] tabular-nums">
+          <p className="mt-3 text-[12.5px] font-medium leading-snug text-muted sm:mt-5 sm:text-[14px]">{t.label}</p>
+          <p className="mt-1 text-[28px] font-bold leading-none tracking-[-0.04em] tabular-nums sm:text-[36px]">
             {t.value === null ? "–" : <CountUp to={t.value} delay={i * 0.08} />}
-            {t.value !== null && t.suffix && <span className="ml-0.5 text-[18px] font-semibold text-muted">{t.suffix}</span>}
+            {t.value !== null && t.suffix && <span className="ml-0.5 text-[14px] font-semibold text-muted sm:text-[18px]">{t.suffix}</span>}
           </p>
-          <p className="mt-3 text-[13px] text-muted">{t.note}</p>
+          <p className="mt-3 hidden text-[13px] text-muted sm:block">{t.note}</p>
         </SpotlightCard>
       ))}
     </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { FileQuestion } from "lucide-react";
 import { useInvestigations } from "@/hooks/use-investigations";
@@ -88,8 +88,9 @@ export function InvestigationView({ id }: { id: string }) {
   return (
     <>
       <Overview item={item} />
+      <MobileSectionNav active={active} />
 
-      <div className="grid gap-8 border-t border-line pt-10 lg:grid-cols-[180px_minmax(0,1fr)]">
+      <div className="grid gap-8 pt-2 lg:grid-cols-[180px_minmax(0,1fr)] lg:border-t lg:border-line lg:pt-10">
         <nav className="hidden lg:block print:hidden">
           <ul className="sticky top-24 space-y-0.5">
             {NAV.map((n) => (
@@ -111,7 +112,7 @@ export function InvestigationView({ id }: { id: string }) {
           </ul>
         </nav>
 
-        <div className="min-w-0 space-y-14">
+        <div className="min-w-0 space-y-12 sm:space-y-14">
           <EvidenceSection r={r} />
           <BreakdownSection r={r} />
           <AiFindingsSection r={r} />
@@ -128,5 +129,39 @@ export function InvestigationView({ id }: { id: string }) {
         </div>
       </div>
     </>
+  );
+}
+
+// Phones: the sidebar is hidden, so sections get a sticky, swipeable chip row under the top bar.
+function MobileSectionNav({ active }: { active: string }) {
+  const row = useRef<HTMLUListElement>(null);
+
+  // Keep the active chip in view. Scrolls the row only, never the page,
+  // so it can't interrupt a smooth scroll to a section.
+  useEffect(() => {
+    const ul = row.current;
+    const chip = ul?.querySelector<HTMLElement>(`[data-id="${active}"]`);
+    if (!ul || !chip) return;
+    ul.scrollTo({ left: chip.offsetLeft - (ul.clientWidth - chip.offsetWidth) / 2, behavior: "smooth" });
+  }, [active]);
+
+  return (
+    <nav aria-label="Sections" className="sticky top-14 z-30 -mx-4 mb-6 border-b border-line bg-bg/95 sm:top-16 lg:hidden print:hidden">
+      <ul ref={row} className="no-scrollbar flex gap-1.5 overflow-x-auto px-4 py-2.5">
+        {NAV.map((n) => (
+          <li key={n.id} data-id={n.id} className="shrink-0">
+            <a
+              href={`#${n.id}`}
+              className={cn(
+                "tap-press block rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors",
+                active === n.id ? "bg-fg text-snow" : "border border-line bg-panel text-muted"
+              )}
+            >
+              {n.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
   );
 }

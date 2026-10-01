@@ -19,6 +19,7 @@ export default function SpotlightCard({
     <div
       ref={ref}
       onPointerMove={(e) => {
+        if (e.pointerType !== "mouse") return;
         const r = ref.current!.getBoundingClientRect();
         ref.current!.style.setProperty("--sx", `${e.clientX - r.left}px`);
         ref.current!.style.setProperty("--sy", `${e.clientY - r.top}px`);

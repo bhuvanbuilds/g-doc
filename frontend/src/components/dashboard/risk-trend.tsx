@@ -27,7 +27,7 @@ function lastSevenDays(items: StoredInvestigation[]) {
 export function RiskTrend({ items }: { items: StoredInvestigation[] }) {
   const data = lastSevenDays(items);
   return (
-    <SpotlightCard spotlightColor="rgb(38 103 255 / 0.1)" className="rounded-2xl border border-line bg-panel p-6">
+    <SpotlightCard spotlightColor="rgb(38 103 255 / 0.1)" className="rounded-2xl border border-line bg-panel p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-[16px] font-semibold tracking-[-0.01em]">Investigations, last 7 days</h2>
         <div className="flex gap-4">
@@ -39,7 +39,7 @@ export function RiskTrend({ items }: { items: StoredInvestigation[] }) {
           ))}
         </div>
       </div>
-      <div className="mt-5 h-[240px]">
+      <div className="mt-5 h-[200px] sm:h-[240px]">
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 4, right: 4, left: -24, bottom: 0 }}>
             <CartesianGrid stroke="#ECE7E5" vertical={false} />

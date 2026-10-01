@@ -14,6 +14,7 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { MapPin, Server } from "lucide-react";
+import { useMediaQuery } from "@/lib/device";
 import { relayPath, type RelayLink, type RelayServer } from "@/lib/derive";
 import type { InvestigateResponse } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -110,7 +111,62 @@ export function RelayGraph({ servers, links }: { servers: RelayServer[]; links: 
   );
 }
 
+// Phones: the same path as a vertical timeline. A pannable graph fights the
+// page scroll on touch and its cards don't fit a narrow screen.
+function RelayTimeline({ servers, links }: { servers: RelayServer[]; links: RelayLink[] }) {
+  return (
+    <ol className="px-4 py-4">
+      {servers.map((s, i) => {
+        const g = s.geo;
+        const link = links[i];
+        const place = g ? [g.city, g.region, g.country_name ?? g.country].filter(Boolean).join(", ") : "";
+        return (
+          <li key={i} className="relative grid grid-cols-[28px_minmax(0,1fr)] gap-x-3">
+            <span
+              className={cn(
+                "relative z-10 mt-0.5 flex size-7 items-center justify-center rounded-full border-2 bg-panel font-mono text-[11px] font-semibold",
+                s.role === "origin" ? "border-gold" : s.role === "recipient" ? "border-sapphire" : "border-line-strong"
+              )}
+            >
+              {i + 1}
+            </span>
+            {link && (
+              <span
+                aria-hidden
+                className={cn(
+                  "absolute bottom-0 left-[13px] top-8 w-0.5",
+                  link.gap ? "bg-[repeating-linear-gradient(to_bottom,#B9B2AF_0_4px,transparent_4px_8px)]" : "bg-sapphire/60"
+                )}
+              />
+            )}
+            <div className={cn("min-w-0", link ? "pb-2" : "")}>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.06em] text-muted">{ROLE_LABEL[s.role]}</p>
+              <p className="mt-0.5 break-all font-mono text-[12.5px] font-medium">{s.host}</p>
+              <p className="font-mono text-[12px] text-muted">{s.ip ?? "IP not recorded"}</p>
+              {g && (
+                <p className="mt-1 flex items-start gap-1.5 text-[12px]">
+                  <MapPin className="mt-0.5 size-3 shrink-0 text-high-fg" />
+                  <span className="min-w-0">
+                    {place || "Location unknown"}
+                    {g.org && <span className="text-muted"> · {g.org}</span>}
+                  </span>
+                </p>
+              )}
+              {link && (
+                <p className={cn("my-3 font-mono text-[11.5px]", link.gap ? "text-subtle" : "text-brand-fg")}>
+                  ↓ {linkLabel(link) || "next hop"}
+                </p>
+              )}
+            </div>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function RelaySection({ r }: { r: InvestigateResponse }) {
+  const wide = useMediaQuery("(min-width: 768px)");
   const { servers, links } = relayPath(r);
   const located = servers.filter((s) => s.geo).length;
   const hops = links.filter((l) => !l.gap).length;
@@ -122,18 +178,25 @@ export function RelaySection({ r }: { r: InvestigateResponse }) {
       description="The mail servers this email passed through, oldest first, reconstructed from Received headers."
     >
       <Panel className="overflow-hidden">
-        <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 px-4 py-4 sm:px-5">
           <h3 className="text-[15px] font-semibold">
             {servers.length} server{servers.length === 1 ? "" : "s"} · {hops} hop{hops === 1 ? "" : "s"}
           </h3>
           <span className="text-[12.5px] text-muted">
-            {located ? `${located} located via IPinfo` : "No IP geolocation for these hops"} · drag to rearrange
+            {located ? `${located} located via IPinfo` : "No IP geolocation for these hops"}
+            {wide && " · drag to rearrange"}
           </span>
         </div>
         <div className="border-t border-line">
-          {servers.length === 0 ? <Empty>No Received headers found in this email.</Empty> : <RelayGraph servers={servers} links={links} />}
+          {servers.length === 0 ? (
+            <Empty>No Received headers found in this email.</Empty>
+          ) : wide ? (
+            <RelayGraph servers={servers} links={links} />
+          ) : (
+            <RelayTimeline servers={servers} links={links} />
+          )}
         </div>
-        <p className="border-t border-line px-5 py-3 text-[12px] text-muted">
+        <p className="border-t border-line px-4 py-3 text-[12px] text-muted sm:px-5">
           Hosting location describes infrastructure, not the person who sent the email. Headers before the first trusted server can be forged.
         </p>
       </Panel>

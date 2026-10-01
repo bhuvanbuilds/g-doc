@@ -47,10 +47,10 @@ export function EmailDetailsSection({ r }: { r: InvestigateResponse }) {
     <Section id="email" title="Email" description="The message as received, including headers and body.">
       <div className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.3fr)]">
         <Panel className="overflow-hidden">
-          <h3 className="px-5 py-4 text-[15px] font-semibold">Headers</h3>
+          <h3 className="px-4 py-4 text-[15px] font-semibold sm:px-5">Headers</h3>
           <dl className="divide-y divide-line border-t border-line text-[13px]">
             {fields.map(([k, v]) => (
-              <div key={k} className="grid grid-cols-[110px_1fr] gap-3 px-5 py-2.5">
+              <div key={k} className="grid grid-cols-[88px_minmax(0,1fr)] gap-3 px-4 py-2.5 sm:grid-cols-[110px_1fr] sm:px-5">
                 <dt className="text-muted">{k}</dt>
                 <dd className="min-w-0 break-all font-mono text-[12.5px]">{v ?? <span className="text-subtle">–</span>}</dd>
               </div>
@@ -59,7 +59,7 @@ export function EmailDetailsSection({ r }: { r: InvestigateResponse }) {
         </Panel>
 
         <Panel className="flex flex-col overflow-hidden">
-          <div className="flex items-center gap-1 px-5 py-3">
+          <div className="flex items-center gap-1 px-4 py-3 sm:px-5">
             <h3 className="mr-auto text-[15px] font-semibold">Body</h3>
             {(["text", "html"] as const).map((t) => (
               <button
@@ -67,7 +67,7 @@ export function EmailDetailsSection({ r }: { r: InvestigateResponse }) {
                 disabled={t === "html" && !hasHtml}
                 onClick={() => setTab(t)}
                 className={cn(
-                  "rounded-md px-2.5 py-1 text-[12.5px] font-medium disabled:opacity-40",
+                  "tap-press rounded-md px-2.5 py-1.5 text-[12.5px] font-medium disabled:opacity-40 sm:py-1",
                   tab === t ? "bg-fg text-snow" : "text-muted hover:bg-fg/5"
                 )}
               >
@@ -77,7 +77,7 @@ export function EmailDetailsSection({ r }: { r: InvestigateResponse }) {
           </div>
           <div className="border-t border-line">
             {tab === "text" ? (
-              <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap px-5 py-4 font-mono text-[12.5px] leading-relaxed">
+              <pre className="max-h-[420px] overflow-auto whitespace-pre-wrap break-words px-4 py-4 font-mono text-[12.5px] leading-relaxed sm:px-5">
                 {e.body_text?.trim() ? highlightUrls(e.body_text) : <span className="text-subtle">No plain-text body.</span>}
               </pre>
             ) : (
@@ -85,7 +85,7 @@ export function EmailDetailsSection({ r }: { r: InvestigateResponse }) {
                 <p className="flex items-center gap-1.5 bg-low/[0.06] px-5 py-2 text-[12px] text-low-fg">
                   <ShieldCheck className="size-3.5" /> Safe preview: scripts, remote images and links are blocked.
                 </p>
-                <iframe title="Email HTML preview" sandbox="" srcDoc={safeHtml(e.body_html)} className="h-[420px] w-full bg-white" />
+                <iframe title="Email HTML preview" sandbox="" srcDoc={safeHtml(e.body_html)} className="h-[360px] w-full bg-white sm:h-[420px]" />
               </>
             )}
           </div>

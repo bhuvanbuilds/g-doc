@@ -37,37 +37,37 @@ export function DashboardView() {
 
   const a = aggregate(items);
   return (
-    <div className="space-y-5">
-      <header className="relative overflow-hidden rounded-3xl bg-black p-6 text-snow sm:p-8 lg:p-10">
+    <div className="space-y-4 sm:space-y-5">
+      <header className="relative overflow-hidden rounded-3xl bg-black p-5 text-snow sm:p-8 lg:p-10">
         <div aria-hidden className="absolute inset-0 [background-image:radial-gradient(rgb(252_247_248/0.07)_1px,transparent_1px)] [background-size:18px_18px]" />
         <div className="relative flex flex-col gap-8 xl:flex-row xl:items-end xl:justify-between">
           <div>
             <p className="text-[13px] font-medium text-snow/70">
               <ShinyText text="Dashboard" />
             </p>
-            <BlurText as="h1" text="Your investigations" className="mt-1 text-[34px] font-semibold tracking-[-0.035em] sm:text-[44px]" />
-            <p className="mt-2 text-[14px] text-snow/60">
+            <BlurText as="h1" text="Your investigations" className="mt-1 text-[30px] font-semibold tracking-[-0.035em] sm:text-[44px]" />
+            <p className="mt-2 text-[13.5px] text-snow/60 sm:text-[14px]">
               Last analysed {timeAgo(items[0].savedAt)} · stored in this browser only
             </p>
           </div>
-          <div className="flex flex-wrap items-end gap-x-10 gap-y-6">
+          <div className="grid grid-cols-3 gap-3 sm:flex sm:flex-wrap sm:items-end sm:gap-x-10 sm:gap-y-6">
             <Stat label="Investigated" value={a.total} />
             <Stat label="Need attention" value={a.levels.high + a.levels.critical} tone="text-[#ec5a63]" />
             <Stat label="Likely safe" value={a.levels.low} tone="text-[#3fcf8e]" />
             <HoldButton
               onConfirm={clearInvestigations}
-              className="flex h-10 items-center gap-2 rounded-full border border-snow/20 px-4 text-[13px] font-medium text-snow/80 hover:border-snow/40"
+              className="col-span-3 flex h-11 items-center justify-center gap-2 rounded-full border border-snow/20 px-4 text-[13px] font-medium text-snow/80 hover:border-snow/40 sm:h-10"
             >
               <Trash2 className="size-3.5" /> Hold to clear history
             </HoldButton>
           </div>
         </div>
       </header>
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,1.7fr)]">
         <RiskDonut levels={a.levels} />
         <KpiTiles avgScore={a.avgScore} authFailPct={a.authFailPct} domains={a.domains} riskyAttachments={a.riskyAttachments} />
       </div>
-      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
+      <div className="grid gap-4 sm:gap-5 xl:grid-cols-[minmax(0,1.7fr)_minmax(0,1fr)]">
         <RiskTrend items={items} />
         <TopSignals signals={a.topSignals} />
       </div>
@@ -79,10 +79,10 @@ export function DashboardView() {
 function Stat({ label, value, tone = "text-snow" }: { label: string; value: number; tone?: string }) {
   return (
     <div>
-      <p className={`text-[48px] font-bold leading-none tracking-[-0.045em] tabular-nums ${tone}`}>
+      <p className={`text-[36px] font-bold leading-none tracking-[-0.045em] tabular-nums sm:text-[48px] ${tone}`}>
         <CountUp to={value} />
       </p>
-      <p className="mt-2 text-[13px] text-snow/60">{label}</p>
+      <p className="mt-2 text-[12px] leading-tight text-snow/60 sm:text-[13px]">{label}</p>
     </div>
   );
 }

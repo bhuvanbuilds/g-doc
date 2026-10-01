@@ -3,17 +3,19 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { LogOut } from "lucide-react";
-import { supabase } from "@/lib/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/lib/supabase/client";
 
 type Profile = { name: string; email: string; avatar: string | null };
 
 export function UserMenu() {
   const [user, setUser] = useState<Profile | null>(null);
-  const [checked, setChecked] = useState(false);
+  // Without Supabase there is no session to look up: show "Sign in" straight away.
+  const [checked, setChecked] = useState(!isSupabaseConfigured);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) return;
     supabase()
       .auth.getUser()
       .then(({ data }) => {

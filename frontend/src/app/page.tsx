@@ -101,7 +101,7 @@ export default function LandingPage() {
       <TopBar active="/" />
 
       {/* hero */}
-      <section className="relative isolate -mt-16 flex min-h-[100svh] items-center justify-center overflow-hidden bg-black px-4 pb-24 pt-32 text-snow">
+      <section className="relative isolate -mt-14 flex min-h-[100svh] items-center justify-center overflow-hidden bg-black px-5 pb-20 pt-28 text-snow sm:-mt-16 sm:px-4 sm:pb-24 sm:pt-32">
         <div aria-hidden className="absolute inset-0 -z-10">
           <FaultyTerminal
             tint="#2667FF"
@@ -127,27 +127,27 @@ export default function LandingPage() {
           <BlurText
             as="h1"
             text="Email forensics that shows its work."
-            className="mt-7 max-w-[1000px] text-[48px] font-semibold leading-[0.98] tracking-[-0.05em] sm:text-[76px] lg:text-[104px]"
+            className="mt-7 max-w-[1000px] text-[44px] font-semibold leading-[0.98] tracking-[-0.05em] sm:text-[76px] lg:text-[104px]"
             stagger={0.07}
           />
-          <p className="mt-8 flex flex-wrap items-center justify-center gap-x-2 text-[18px] text-snow/70 sm:text-[21px]">
+          <p className="mt-8 flex flex-wrap items-center justify-center gap-x-2 gap-y-2 text-[17px] text-snow/70 sm:text-[21px]">
             Built for
             <RotatingText
               words={["security analysts", "IT teams", "everyday users", "incident response"]}
               className="rounded-lg bg-snow px-2.5 py-0.5 font-semibold text-black"
             />
           </p>
-          <p className="mt-6 max-w-[640px] text-[16.5px] leading-relaxed text-snow/65">
+          <p className="mt-6 max-w-[640px] text-[15.5px] leading-relaxed text-snow/65 sm:text-[16.5px]">
             Upload a suspicious email and get a clear verdict for anyone, with the full forensic trail underneath for
             whoever needs to dig in.
           </p>
-          <div className="mt-11 flex flex-wrap justify-center gap-3">
-            <Link href="/home" className="shiny-cta inline-flex h-13 items-center px-8 text-[15.5px] font-semibold">
+          <div className="mt-10 flex w-full flex-col gap-3 sm:mt-11 sm:w-auto sm:flex-row sm:flex-wrap sm:justify-center">
+            <Link href="/home" className="shiny-cta tap-press inline-flex h-13 items-center justify-center px-8 text-[15.5px] font-semibold">
               <span>Investigate an email</span>
             </Link>
             <Link
               href="/dashboard"
-              className="inline-flex h-13 items-center rounded-full border border-snow/20 bg-snow/[0.06] px-7 text-[15.5px] font-medium text-snow backdrop-blur hover:bg-snow/[0.12]"
+              className="tap-press inline-flex h-13 items-center justify-center rounded-full border border-snow/20 bg-snow/[0.06] px-7 text-[15.5px] font-medium text-snow hover:bg-snow/[0.12] sm:backdrop-blur"
             >
               Open dashboard
             </Link>
@@ -159,27 +159,30 @@ export default function LandingPage() {
         {/* principles */}
         <section className="mx-auto grid max-w-[1200px] gap-4 md:grid-cols-3">
           {PRINCIPLES.map(({ icon: Icon, title, body, color, glow }) => (
-            <SpotlightCard key={title} spotlightColor={glow} className="rounded-2xl border border-line bg-panel p-7">
+            <SpotlightCard key={title} spotlightColor={glow} className="rounded-2xl border border-line bg-panel p-5 sm:p-7">
               <Icon className="size-7" strokeWidth={1.75} style={{ color }} />
-              <h3 className="mt-6 text-[19px] font-semibold tracking-[-0.02em]">{title}</h3>
+              <h3 className="mt-4 text-[18px] font-semibold tracking-[-0.02em] sm:mt-6 sm:text-[19px]">{title}</h3>
               <p className="mt-2 text-[14.5px] leading-relaxed text-muted">{body}</p>
             </SpotlightCard>
           ))}
         </section>
 
         {/* how it works */}
-        <section className="mx-auto mt-28 max-w-[1200px]">
+        <section className="mx-auto mt-20 max-w-[1200px] sm:mt-28">
           <SectionHead eyebrow="How it works" title="From raw email to explained verdict in five steps." />
-          <ol className="mt-12 grid gap-6 md:grid-cols-5">
+          <ol className="mt-10 grid gap-6 sm:mt-12 md:grid-cols-5">
             {STEPS.map(({ icon: Icon, title, body }, i) => (
-              <li key={title} className="relative">
+              <li key={title} className="relative grid grid-cols-[48px_minmax(0,1fr)] gap-x-4 md:block">
+                {i < STEPS.length - 1 && (
+                  <span aria-hidden className="absolute bottom-[-24px] left-6 top-12 w-px bg-gradient-to-b from-line-strong to-transparent md:hidden" />
+                )}
                 {i < STEPS.length - 1 && (
                   <span aria-hidden className="absolute left-12 right-0 top-6 hidden h-px bg-gradient-to-r from-line-strong to-transparent md:block" />
                 )}
-                <span className="relative flex size-12 items-center justify-center rounded-2xl bg-fg text-snow">
+                <span className="relative row-span-3 flex size-12 items-center justify-center rounded-2xl bg-fg text-snow">
                   <Icon className="size-5" />
                 </span>
-                <p className="mt-5 font-mono text-[12px] text-subtle">
+                <p className="font-mono text-[12px] text-subtle md:mt-5">
                   <DecryptedText text={`STEP 0${i + 1}`} />
                 </p>
                 <h3 className="mt-1 text-[18px] font-semibold tracking-[-0.02em]">{title}</h3>
@@ -190,21 +193,25 @@ export default function LandingPage() {
         </section>
 
         {/* what we check */}
-        <section className="mx-auto mt-28 max-w-[1200px]">
+        <section className="mx-auto mt-20 max-w-[1200px] sm:mt-28">
           <SectionHead eyebrow="What gets checked" title="Technical and AI signals, correlated in one investigation." />
-          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="mt-10 grid gap-3 sm:mt-12 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
             {CHECKS.map(({ icon: Icon, title, body, glow, color }) => (
-              <SpotlightCard key={title} spotlightColor={glow} className="rounded-2xl border border-line bg-panel p-6">
-                <Icon className="size-6" strokeWidth={1.75} style={{ color }} />
-                <h3 className="mt-5 text-[16px] font-semibold">{title}</h3>
-                <p className="mt-1.5 text-[13.5px] leading-relaxed text-muted">{body}</p>
+              <SpotlightCard key={title} spotlightColor={glow} className="rounded-2xl border border-line bg-panel p-4 sm:p-6">
+                <div className="flex gap-4 sm:block">
+                  <Icon className="mt-0.5 size-6 shrink-0" strokeWidth={1.75} style={{ color }} />
+                  <div>
+                    <h3 className="text-[16px] font-semibold sm:mt-5">{title}</h3>
+                    <p className="mt-1 text-[13.5px] leading-relaxed text-muted sm:mt-1.5">{body}</p>
+                  </div>
+                </div>
               </SpotlightCard>
             ))}
           </div>
         </section>
 
         {/* scoring */}
-        <section className="mx-auto mt-28 grid max-w-[1200px] gap-10 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+        <section className="mx-auto mt-20 grid max-w-[1200px] gap-10 sm:mt-28 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <div>
             <SectionHead eyebrow="Transparent scoring" title="Every point is accounted for." align="left" />
             <p className="mt-5 max-w-[460px] text-[15px] leading-relaxed text-muted">
@@ -224,7 +231,7 @@ export default function LandingPage() {
           <div className="overflow-hidden rounded-2xl border border-line bg-panel">
             <ul className="divide-y divide-line">
               {RULES.map(([label, pts]) => (
-                <li key={label} className="grid grid-cols-[1fr_140px_44px] items-center gap-4 px-5 py-3">
+                <li key={label} className="grid grid-cols-[minmax(0,1fr)_56px_36px] items-center gap-3 px-4 py-3 sm:grid-cols-[1fr_140px_44px] sm:gap-4 sm:px-5">
                   <span className="text-[14px]">{label}</span>
                   <span className="h-1.5 overflow-hidden rounded-full bg-fg/[0.06]">
                     <span className="block h-full rounded-full bg-fg" style={{ width: `${(pts / maxPts) * 100}%` }} />
@@ -237,11 +244,11 @@ export default function LandingPage() {
         </section>
 
         {/* privacy */}
-        <section className="relative mx-auto mt-28 max-w-[1200px] overflow-hidden rounded-3xl bg-black px-6 py-16 text-snow sm:px-12 sm:py-20">
+        <section className="relative mx-auto mt-20 max-w-[1200px] overflow-hidden rounded-3xl bg-black px-6 py-14 text-snow sm:mt-28 sm:px-12 sm:py-20">
           <div aria-hidden className="absolute inset-0 [background-image:radial-gradient(rgb(252_247_248/0.07)_1px,transparent_1px)] [background-size:18px_18px]" />
           <div className="relative flex flex-col items-center text-center">
             <Lock className="size-6 text-gold" />
-            <h2 className="mt-6 text-[30px] font-semibold tracking-[-0.03em] sm:text-[44px]">
+            <h2 className="mt-6 text-[28px] font-semibold leading-tight tracking-[-0.03em] sm:text-[44px]">
               <TrueFocus sentence="No inbox access. No tracking. Evidence only." blur={6} pause={1} />
             </h2>
             <ul className="mt-10 grid max-w-[900px] gap-6 text-left text-[14.5px] text-snow/75 sm:grid-cols-2">
@@ -254,19 +261,23 @@ export default function LandingPage() {
         </section>
 
         {/* stack */}
-        <section className="mx-auto mt-28 max-w-[1200px] text-center">
+        <section className="mx-auto mt-20 max-w-[1200px] text-center sm:mt-28">
           <SectionHead eyebrow="Built with" title="A small, inspectable stack." />
           <div className="mt-10 flex flex-wrap justify-center gap-2.5">
             {["Next.js", "TypeScript", "Tailwind CSS", "React Flow", "Recharts", "FastAPI", "Python", "Groq", "VirusTotal", "IPinfo"].map((t) => (
-              <span key={t} className="rounded-full border border-line bg-panel px-4 py-2 text-[14px] font-medium">
+              <span key={t} className="rounded-full border border-line bg-panel px-3.5 py-1.5 text-[13.5px] font-medium sm:px-4 sm:py-2 sm:text-[14px]">
                 {t}
               </span>
             ))}
           </div>
           <p className="mx-auto mt-16 max-w-[640px] text-[13.5px] leading-relaxed text-muted">
             Built for Problem Statement 106: AI-Powered Email Threat Detection, GeoLocation and Forensic Intelligence
-            Platform. Press <kbd className="rounded border border-line bg-panel px-1 font-mono text-[12px]">?</kbd> anywhere for
-            keyboard shortcuts. Read our{" "}
+            Platform.{" "}
+            <span className="pointer-coarse:hidden">
+              Press <kbd className="rounded border border-line bg-panel px-1 font-mono text-[12px]">?</kbd> anywhere for
+              keyboard shortcuts.
+            </span>{" "}
+            Read our{" "}
             <Link href="/privacy" className="font-medium text-fg underline underline-offset-2">
               Privacy Policy
             </Link>
@@ -298,7 +309,7 @@ function SectionHead({ eyebrow, title, align = "center" }: { eyebrow: string; ti
   return (
     <div className={align === "center" ? "mx-auto max-w-[760px] text-center" : ""}>
       <p className="text-[13px] font-semibold uppercase tracking-[0.14em] text-sapphire">{eyebrow}</p>
-      <BlurText as="h2" text={title} className="mt-3 text-[32px] font-semibold leading-[1.1] tracking-[-0.035em] sm:text-[42px]" stagger={0.04} />
+      <BlurText as="h2" text={title} className="mt-3 text-[28px] font-semibold leading-[1.1] tracking-[-0.035em] sm:text-[42px]" stagger={0.04} />
     </div>
   );
 }

@@ -38,7 +38,7 @@ export function Overview({ item }: { item: StoredInvestigation }) {
   const maxPts = Math.max(1, ...reasons.map((c) => c.points ?? 0));
 
   return (
-    <section id="overview" className="flex min-h-[calc(100svh-64px)] flex-col gap-4 pb-5 pt-5">
+    <section id="overview" className="flex flex-col gap-4 pb-5 pt-4 sm:pt-5 lg:min-h-[calc(100svh-64px)]">
       {/* identity */}
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="min-w-0">
@@ -49,34 +49,34 @@ export function Overview({ item }: { item: StoredInvestigation }) {
           <BlurText
             as="h1"
             text={e.subject || "(no subject)"}
-            className="mt-1 line-clamp-1 text-[26px] font-semibold tracking-[-0.03em] sm:text-[30px]"
+            className="mt-1 line-clamp-2 text-[22px] font-semibold leading-tight tracking-[-0.03em] sm:line-clamp-1 sm:text-[30px]"
             stagger={0.03}
           />
-          <p className="mt-1 truncate text-[14px] text-muted">
+          <p className="mt-1 truncate text-[13px] text-muted sm:text-[14px]">
             <span className="text-fg">{e.from ?? "Unknown sender"}</span>
             {e.to && <> → {e.to}</>}
             {e.date && <> · {e.date}</>}
           </p>
         </div>
-        <div className="flex shrink-0 gap-2 print:hidden">
+        <div className="grid shrink-0 grid-cols-3 gap-2 sm:flex print:hidden">
           <button
             onClick={() => exportInvestigation(item)}
             title="Export JSON (E)"
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-line bg-panel px-3 text-[13px] font-medium hover:bg-fg/[0.03]"
+            className="tap-press inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line bg-panel px-3 text-[13px] font-medium hover:bg-fg/[0.03] sm:h-9"
           >
             <Download className="size-4" /> JSON
           </button>
           <button
             onClick={() => window.print()}
             title="Print report (P)"
-            className="inline-flex h-9 items-center gap-2 rounded-lg border border-line bg-panel px-3 text-[13px] font-medium hover:bg-fg/[0.03]"
+            className="tap-press inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-line bg-panel px-3 text-[13px] font-medium hover:bg-fg/[0.03] sm:h-9"
           >
             <Printer className="size-4" /> Report
           </button>
           <Link
             href="/home"
             title="New investigation (H)"
-            className="inline-flex h-9 items-center gap-2 rounded-lg bg-fg px-3 text-[13px] font-medium text-snow hover:bg-fg/85"
+            className="tap-press inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-fg px-3 text-[13px] font-medium text-snow hover:bg-fg/85 sm:h-9"
           >
             <Plus className="size-4" /> New
           </Link>
@@ -151,13 +151,13 @@ export function Overview({ item }: { item: StoredInvestigation }) {
       </div>
 
       {/* quick checks */}
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+      <div className="grid grid-cols-2 gap-2.5 sm:gap-3 md:grid-cols-3 xl:grid-cols-6">
         {quick.map((c) => (
           <QuickCheck key={c.id} check={c} />
         ))}
       </div>
 
-      <a href="#evidence" className="mx-auto inline-flex items-center gap-1.5 text-[13px] font-medium text-muted hover:text-fg print:hidden">
+      <a href="#evidence" className="mx-auto hidden items-center gap-1.5 text-[13px] font-medium text-muted hover:text-fg lg:inline-flex print:hidden">
         Full evidence below <ArrowDown className="size-3.5 animate-bounce" />
       </a>
     </section>
@@ -168,7 +168,7 @@ function QuickCheck({ check }: { check: Check }) {
   const s = checkStyle[check.status];
   return (
     <SpotlightCard spotlightColor={CHECK_GLOW[check.status]} className="rounded-xl border border-line bg-panel">
-      <a href={`#${check.anchor}`} className="group block p-4">
+      <a href={`#${check.anchor}`} className="group block p-3.5 sm:p-4">
         <div className="flex items-center justify-between">
           <p className="text-[13px] font-medium text-muted">{check.label}</p>
           <ArrowUpRight className="size-3.5 text-subtle opacity-0 transition group-hover:opacity-100" />
@@ -189,12 +189,13 @@ function GaugeCard({ level, score, confidence }: { level: RiskLevel; score: numb
   const s = riskStyle[level];
   const tone = score !== null ? scoreColor(score) : "#8A8F9A";
   return (
-    <div className="relative flex flex-col items-center overflow-hidden rounded-3xl bg-black px-6 pb-6 pt-5 text-snow">
+    <div className="relative flex flex-col items-center overflow-hidden rounded-3xl bg-black px-5 pb-6 pt-5 text-snow sm:px-6">
       <div aria-hidden className="absolute inset-0 [background-image:radial-gradient(rgb(252_247_248/0.07)_1px,transparent_1px)] [background-size:18px_18px]" />
+      {/* soft glow as a gradient, not filter: blur(), which is expensive to paint on phones */}
       <div
         aria-hidden
-        className="absolute left-1/2 top-[42%] size-[340px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25 blur-[90px]"
-        style={{ background: tone }}
+        className="absolute left-1/2 top-[42%] size-[520px] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-25"
+        style={{ background: `radial-gradient(closest-side, ${tone}, transparent)` }}
       />
 
       <div className="relative flex w-full items-center justify-between">

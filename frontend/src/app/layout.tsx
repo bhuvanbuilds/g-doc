@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter_Tight, JetBrains_Mono } from "next/font/google";
 import ClickSpark from "@/components/reactbits/ClickSpark";
+import { MobileTabBar } from "@/components/mobile-tabbar";
 import { Shortcuts } from "@/components/shortcuts";
 import { site } from "@/lib/site";
 import "./globals.css";
@@ -38,6 +39,13 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, "max-image-preview": "large" } },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+  themeColor: "#ffffff",
+};
+
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "WebApplication",
@@ -70,6 +78,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <ClickSpark sparkColor="#2667FF" sparkSize={10} sparkRadius={18} sparkCount={8} duration={420}>
           {children}
         </ClickSpark>
+        <MobileTabBar />
         <Shortcuts />
       </body>
     </html>

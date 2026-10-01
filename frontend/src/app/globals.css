@@ -615,3 +615,51 @@
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
+
+/* ─── Mobile ───────────────────────────────────────────────────────────────
+   Touch-first tuning. Kept in one place so the desktop styles above stay
+   untouched.                                                               */
+html {
+  -webkit-text-size-adjust: 100%;
+}
+a,
+button,
+summary,
+label {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* bottom tab bar: room for the bar plus the home indicator */
+.mobile-tabbar-space {
+  height: calc(64px + env(safe-area-inset-bottom));
+}
+
+/* horizontal chip rows that scroll without a visible bar */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  /* fixed backgrounds force a full repaint on every scroll frame */
+  .dot-matrix {
+    background-attachment: scroll;
+  }
+  /* animating filter: blur per word is costly on phone GPUs; fade + slide only */
+  .blur-word {
+    filter: none !important;
+    will-change: transform, opacity;
+  }
+}
+
+@media (pointer: coarse) {
+  .tap-press {
+    transition: transform 120ms ease;
+  }
+  .tap-press:active {
+    transform: scale(0.97);
+  }
+}

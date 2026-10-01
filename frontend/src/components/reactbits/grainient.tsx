@@ -6,11 +6,13 @@
  * MIT + Commons Clause.
  *
  * Changes: typed uniforms (no `any`), named export, and reduced-motion users
- * get a single still frame instead of an animation loop.
+ * and phones / low-end devices get a single still frame instead of an
+ * animation loop.
  */
 
 import React, { useEffect, useRef } from "react";
 import { Renderer, Program, Mesh, Triangle } from "ogl";
+import { isLiteDevice } from "@/lib/device";
 
 interface GrainientProps {
   timeSpeed?: number;
@@ -190,11 +192,13 @@ export const Grainient: React.FC<GrainientProps> = ({
     const container = containerRef.current;
     if (!container) return;
 
+    const still =
+      isLiteDevice() || window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const renderer = new Renderer({
       webgl: 2,
       alpha: true,
       antialias: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 2),
+      dpr: still ? 1 : Math.min(window.devicePixelRatio || 1, 2),
     });
 
     const gl = renderer.gl;
@@ -267,7 +271,7 @@ export const Grainient: React.FC<GrainientProps> = ({
     };
 
     const tryStart = () => {
-      if (isVisible && isPageVisible && raf === 0)
+      if (!still && isVisible && isPageVisible && raf === 0)
         raf = requestAnimationFrame(loop);
     };
     const tryStop = () => {
@@ -294,11 +298,8 @@ export const Grainient: React.FC<GrainientProps> = ({
     };
     document.addEventListener("visibilitychange", onVisibility);
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      renderer.render({ scene: mesh });
-    } else {
-      tryStart();
-    }
+    if (still) renderer.render({ scene: mesh });
+    else tryStart();
 
     return () => {
       tryStop();
@@ -320,7 +321,7 @@ export const Grainient: React.FC<GrainientProps> = ({
     if (!container) return;
     const ctx = ctxMap.get(container);
     if (!ctx) return;
-    const { program } = ctx;
+    const { renderer, program, mesh } = ctx;
     const u = program.uniforms as Record<
       string,
       { value: number | Float32Array }
@@ -348,6 +349,8 @@ export const Grainient: React.FC<GrainientProps> = ({
     u.uColor2.value = new Float32Array(hexToRgb(color2));
     u.uColor3.value = new Float32Array(hexToRgb(color3));
     u.uLightMode.value = lightMode ? 1.0 : 0.0;
+    // Still frames (reduced motion, lite devices) have no loop to pick this up.
+    renderer.render({ scene: mesh });
   }, [
     timeSpeed,
     colorBalance,

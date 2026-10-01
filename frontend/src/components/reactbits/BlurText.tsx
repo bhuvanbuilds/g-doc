@@ -30,7 +30,7 @@ export default function BlurText({
         <motion.span
           key={i}
           aria-hidden
-          className="inline-block will-change-[filter,transform]"
+          className="blur-word inline-block will-change-[filter,transform]"
           initial={reduce ? false : { filter: "blur(10px)", opacity: 0, y: direction === "top" ? -12 : 12 }}
           animate={inView ? { filter: "blur(0px)", opacity: 1, y: 0 } : undefined}
           transition={{ duration: 0.55, delay: delay + i * stagger, ease: [0.2, 0.8, 0.2, 1] }}

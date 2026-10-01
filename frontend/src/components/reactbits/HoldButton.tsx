@@ -49,6 +49,8 @@ export default function HoldButton({
       onPointerDown={begin}
       onPointerUp={cancel}
       onPointerLeave={cancel}
+      onPointerCancel={cancel}
+      onContextMenu={(e) => e.preventDefault()}
       onKeyDown={(e) => {
         if ((e.key === " " || e.key === "Enter") && !e.repeat) {
           e.preventDefault();
@@ -56,7 +58,7 @@ export default function HoldButton({
         }
       }}
       onKeyUp={cancel}
-      className={cn("relative isolate select-none overflow-hidden", className)}
+      className={cn("relative isolate touch-none select-none overflow-hidden [-webkit-touch-callout:none]", className)}
     >
       <span
         aria-hidden

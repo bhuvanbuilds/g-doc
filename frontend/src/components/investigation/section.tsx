@@ -13,9 +13,9 @@ export function Section({
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-24">
+    <section id={id} className="scroll-mt-32 sm:scroll-mt-36 lg:scroll-mt-24">
       <div className="mb-4">
-        <h2 className="text-[22px] font-semibold tracking-[-0.025em]">{title}</h2>
+        <h2 className="text-[20px] font-semibold tracking-[-0.025em] sm:text-[22px]">{title}</h2>
         {description && <p className="mt-1 text-[14px] text-muted">{description}</p>}
       </div>
       {children}

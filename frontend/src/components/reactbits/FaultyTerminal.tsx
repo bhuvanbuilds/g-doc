@@ -4,11 +4,14 @@
  * CRT terminal glyph field (WebGL via ogl).
  * Adapted from React Bits "Faulty Terminal" (https://reactbits.dev) by David Haz,
  * MIT + Commons Clause. Changes: SSR-safe dpr, window-level pointer tracking,
- * pauses offscreen and honours prefers-reduced-motion.
+ * pauses offscreen or in a hidden tab, and honours prefers-reduced-motion.
+ * On phones and low-end devices it renders at reduced resolution and 30fps,
+ * without chromatic aberration (which triples the shader work) or mouse tracking.
  */
 
 import { Renderer, Program, Mesh, Color, Triangle } from "ogl";
 import { useEffect, useMemo, useRef } from "react";
+import { isLiteDevice } from "@/lib/device";
 
 type Vec2 = [number, number];
 
@@ -286,7 +289,10 @@ export default function FaultyTerminal({
     if (!ctn) return;
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const renderer = new Renderer({ dpr: Math.min(window.devicePixelRatio || 1, 2) });
+    const lite = isLiteDevice();
+    const useMouse = mouseReact && !lite;
+    // The glyph field is soft by design, so sub-native resolution is barely visible.
+    const renderer = new Renderer({ dpr: lite ? 0.6 : Math.min(window.devicePixelRatio || 1, 2) });
     const gl = renderer.gl;
     gl.clearColor(0, 0, 0, 1);
 
@@ -303,13 +309,13 @@ export default function FaultyTerminal({
         uGlitchAmount: { value: glitchAmount },
         uFlickerAmount: { value: flickerAmount },
         uNoiseAmp: { value: noiseAmp },
-        uChromaticAberration: { value: chromaticAberration },
+        uChromaticAberration: { value: lite ? 0 : chromaticAberration },
         uDither: { value: dither },
         uCurvature: { value: curvature },
         uTint: { value: new Color(tintVec[0], tintVec[1], tintVec[2]) },
         uMouse: { value: new Float32Array([0.5, 0.5]) },
         uMouseStrength: { value: mouseStrength },
-        uUseMouse: { value: mouseReact && !reduceMotion ? 1 : 0 },
+        uUseMouse: { value: useMouse && !reduceMotion ? 1 : 0 },
         uPageLoadProgress: { value: pageLoadAnimation && !reduceMotion ? 0 : 1 },
         uUsePageLoadAnimation: { value: pageLoadAnimation && !reduceMotion ? 1 : 0 },
         uBrightness: { value: brightness },
@@ -324,6 +330,8 @@ export default function FaultyTerminal({
     let raf = 0;
     let loadStart = 0;
     let visible = true;
+    let lastFrame = 0;
+    const frameGap = lite ? 1000 / 30 : 0;
 
     const draw = (t: number) => {
       program.uniforms.iTime.value = (t * 0.001 + timeOffset) * timeScale;
@@ -331,7 +339,7 @@ export default function FaultyTerminal({
         if (!loadStart) loadStart = t;
         program.uniforms.uPageLoadProgress.value = Math.min((t - loadStart) / 2000, 1);
       }
-      if (mouseReact) {
+      if (useMouse) {
         smooth.x += (mouse.x - smooth.x) * 0.08;
         smooth.y += (mouse.y - smooth.y) * 0.08;
         const m = program.uniforms.uMouse.value as Float32Array;
@@ -342,8 +350,11 @@ export default function FaultyTerminal({
     };
 
     const loop = (t: number) => {
-      draw(t);
-      raf = visible ? requestAnimationFrame(loop) : 0;
+      if (t - lastFrame >= frameGap) {
+        lastFrame = t;
+        draw(t);
+      }
+      raf = visible && !document.hidden ? requestAnimationFrame(loop) : 0;
     };
     const start = () => {
       if (reduceMotion) draw(performance.now());
@@ -364,13 +375,15 @@ export default function FaultyTerminal({
       if (visible) start();
     });
     io.observe(ctn);
+    const onVisibility = () => visible && start();
+    document.addEventListener("visibilitychange", onVisibility);
 
     const onMove = (e: PointerEvent) => {
       const r = ctn.getBoundingClientRect();
       mouse.x = (e.clientX - r.left) / r.width;
       mouse.y = 1 - (e.clientY - r.top) / r.height;
     };
-    if (mouseReact) window.addEventListener("pointermove", onMove, { passive: true });
+    if (useMouse) window.addEventListener("pointermove", onMove, { passive: true });
 
     gl.canvas.style.display = "block";
     ctn.appendChild(gl.canvas);
@@ -380,6 +393,7 @@ export default function FaultyTerminal({
       cancelAnimationFrame(raf);
       ro.disconnect();
       io.disconnect();
+      document.removeEventListener("visibilitychange", onVisibility);
       window.removeEventListener("pointermove", onMove);
       if (gl.canvas.parentElement === ctn) ctn.removeChild(gl.canvas);
       gl.getExtension("WEBGL_lose_context")?.loseContext();

@@ -37,9 +37,13 @@ export default function ClickSpark({
     let raf = 0;
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
-    const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
+    // Sized lazily on tap: mobile browsers fire resize whenever the URL bar
+    // shows or hides, and reallocating a full-screen canvas mid-scroll janks.
+    const fit = () => {
+      const w = Math.round(window.innerWidth * dpr);
+      const h = Math.round(window.innerHeight * dpr);
+      if (canvas.width !== w) canvas.width = w;
+      if (canvas.height !== h) canvas.height = h;
     };
 
     const draw = (now: number) => {
@@ -71,6 +75,7 @@ export default function ClickSpark({
 
     const onClick = (e: PointerEvent) => {
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      fit();
       const now = performance.now();
       for (let i = 0; i < sparkCount; i++) {
         sparks.push({
@@ -83,12 +88,9 @@ export default function ClickSpark({
       if (!raf) raf = requestAnimationFrame(draw);
     };
 
-    resize();
-    window.addEventListener("resize", resize);
-    window.addEventListener("pointerdown", onClick);
+    window.addEventListener("pointerdown", onClick, { passive: true });
     return () => {
       cancelAnimationFrame(raf);
-      window.removeEventListener("resize", resize);
       window.removeEventListener("pointerdown", onClick);
     };
   }, [sparkColor, sparkSize, sparkRadius, sparkCount, duration, extraScale]);
@@ -99,6 +101,8 @@ export default function ClickSpark({
       <canvas
         ref={canvasRef}
         aria-hidden
+        width={0}
+        height={0}
         className="pointer-events-none fixed inset-0 z-[100] h-screen w-screen"
       />
     </>

@@ -12,8 +12,8 @@ const nav = [
 
 export function TopBar({ active }: { active?: "/home" | "/dashboard" | "/" }) {
   return (
-    <header className="sticky top-0 z-40 border-b border-line bg-panel/75 backdrop-blur-xl">
-      <div className="flex h-16 items-center gap-8 px-5 lg:px-8">
+    <header className="sticky top-0 z-40 border-b border-line bg-panel/95 pt-[env(safe-area-inset-top)] sm:bg-panel/75 sm:backdrop-blur-xl">
+      <div className="flex h-14 items-center gap-8 px-4 sm:h-16 sm:px-5 lg:px-8">
         <Link href="/home">
           <Logo />
         </Link>

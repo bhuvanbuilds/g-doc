@@ -31,7 +31,7 @@ function EvidenceCard({
   note?: string;
 }) {
   return (
-    <Panel className="flex flex-col p-5">
+    <Panel className="flex flex-col p-4 sm:p-5">
       <div className="flex items-center justify-between gap-3">
         <h3 className="text-[14px] font-semibold">{title}</h3>
         <StatusTag status={status} label={statusLabel} />
@@ -135,14 +135,49 @@ export function EvidenceSection({ r }: { r: InvestigateResponse }) {
 
       {/* links */}
       <Panel className="mt-4 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 px-4 py-4 sm:px-5">
           <h3 className="text-[15px] font-semibold">Links</h3>
-          <span className="text-[13px] text-muted">{te.urls.urls.length} found · checked with VirusTotal</span>
+          <span className="text-[12.5px] text-muted sm:text-[13px]">{te.urls.urls.length} found · checked with VirusTotal</span>
         </div>
         {te.urls.urls.length === 0 ? (
           <Empty>No links in this email.</Empty>
         ) : (
-          <div className="overflow-x-auto border-t border-line">
+          <>
+          {/* phones: one card per link instead of a wide table */}
+          <ul className="divide-y divide-line border-t border-line md:hidden">
+            {te.urls.urls.map((u) => {
+              const issues = urlObs(u.url);
+              const vt = vtLabel(vtFor(u.url));
+              return (
+                <li key={u.url} className="px-4 py-3.5">
+                  <div className="flex items-center justify-between gap-3">
+                    <span className="min-w-0 truncate font-mono text-[12.5px] font-medium">
+                      {u.hostname}
+                      {u.port ? `:${u.port}` : ""}
+                    </span>
+                    <StatusTag status={vt.status} label={vt.text} />
+                  </div>
+                  <p className="mt-1.5 line-clamp-2 break-all font-mono text-[11.5px] text-muted">{u.url}</p>
+                  {issues.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-1.5">
+                      {issues.map((o) => (
+                        <li
+                          key={o.type}
+                          className={cn(
+                            "rounded-md px-2 py-0.5 text-[12px] font-medium",
+                            o.severity === "low" ? "bg-med-soft text-med-fg" : "bg-high-soft text-high-fg"
+                          )}
+                        >
+                          {o.title}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+          <div className="hidden overflow-x-auto border-t border-line md:block">
             <table className="w-full min-w-[720px] text-left text-[13px]">
               <thead className="bg-fg/[0.02] text-[12px] text-muted">
                 <tr>
@@ -197,14 +232,15 @@ export function EvidenceSection({ r }: { r: InvestigateResponse }) {
               </tbody>
             </table>
           </div>
+          </>
         )}
       </Panel>
 
       {/* attachments */}
       <Panel className="mt-4 overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-0.5 px-4 py-4 sm:px-5">
           <h3 className="text-[15px] font-semibold">Attachments</h3>
-          <span className="text-[13px] text-muted">Metadata only, files are never opened</span>
+          <span className="text-[12.5px] text-muted sm:text-[13px]">Metadata only, files are never opened</span>
         </div>
         {te.attachments.attachments.length === 0 ? (
           <Empty>No attachments.</Empty>
@@ -213,9 +249,9 @@ export function EvidenceSection({ r }: { r: InvestigateResponse }) {
             {te.attachments.attachments.map((f) => {
               const bad = attObs(f.filename);
               return (
-                <li key={f.filename} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-5 py-3">
+                <li key={f.filename} className="flex flex-wrap items-center gap-x-4 gap-y-1 px-4 py-3 sm:px-5">
                   <Paperclip className="size-4 text-subtle" />
-                  <span className="font-mono text-[13px]">{f.filename}</span>
+                  <span className="min-w-0 break-all font-mono text-[13px]">{f.filename}</span>
                   <span className="text-[12.5px] text-muted">{f.content_type}</span>
                   <span className="text-[12.5px] text-muted">{formatBytes(f.size)}</span>
                   <span className="ml-auto">

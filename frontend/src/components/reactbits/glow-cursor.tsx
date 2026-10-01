@@ -7,7 +7,8 @@
  * MIT + Commons Clause.
  *
  * Changes: props are synced to the render loop in an effect (the original
- * wrote a ref during render), and it is off for reduced-motion users. The
+ * wrote a ref during render), and it is off for reduced-motion users and on
+ * touch screens (there is no cursor to follow). The
  * canvas element is reused across effect runs, so its WebGL context must not
  * be force-lost on cleanup.
  */
@@ -256,7 +257,7 @@ export const GlowCursor = ({
     const canvas = canvasRef.current;
     if (!container || !canvas) return;
 
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce), (hover: none)").matches) return;
     const initialConfig = propsRef.current;
     const renderer = new Renderer({
       canvas,
